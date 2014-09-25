@@ -7,7 +7,7 @@ import play.api.data.{Form, Mapping}
 import java.io.{File,FileInputStream,ByteArrayOutputStream}
 import scala.io.Source
 import com.itextpdf.text.pdf._
-import com.itextpdf.text.{Paragraph, BaseColor, Document, Image, Element}
+import com.itextpdf.text.{Paragraph, BaseColor, Document, Image, Element, Rectangle}
 
 import models._
 import controllers.Application.isAprilFool
@@ -127,7 +127,7 @@ object Composer extends Controller {
         val baseLayer = new PdfLayer("Character Sheet", writer);
         canvas.beginLayer(baseLayer)
         canvas.setColorFill(BaseColor.WHITE)
-        canvas.rectangle(0f, 0f, 2000f, 2000f)
+        canvas.rectangle(0f, 0f, pageSize.getWidth(), pageSize.getHeight())
         canvas.fill
 
         canvas.setGState(defaultGstate)
@@ -135,7 +135,7 @@ object Composer extends Controller {
         //  the page
         canvas.addTemplate(template, 0, 0)
         writeCopyright(canvas, writer, gameData)
-        writeColourOverlay(canvas, gmdata.colour)
+        writeColourOverlay(canvas, gmdata.colour, pageSize)
         canvas.endLayer()
 
         if (page.slot == "kingdom" || page.slot == "hex-a4" || page.slot == "hex-a3" || page.slot == "hex-a4-landscape" || page.slot == "iso-a4" || page.slot == "grid-a4") {
@@ -268,7 +268,7 @@ object Composer extends Controller {
       val baseLayer = new PdfLayer("Character Sheet", writer);
       canvas.beginLayer(baseLayer)
       canvas.setColorFill(BaseColor.WHITE)
-      canvas.rectangle(0f, 0f, 1500f, 1500f)
+      canvas.rectangle(0f, 0f, pageSize.getWidth(), pageSize.getHeight())
       canvas.fill
 
 
@@ -297,7 +297,7 @@ object Composer extends Controller {
         }
       }
 
-      writeColourOverlay(canvas, colour)
+      writeColourOverlay(canvas, colour, pageSize)
 
       canvas.endLayer()
 
@@ -508,7 +508,7 @@ object Composer extends Controller {
     canvas.endText
   }
 
-  def writeColourOverlay(canvas: PdfContentByte, colour: String) {
+  def writeColourOverlay(canvas: PdfContentByte, colour: String, pageSize: Rectangle) {
     if (colour == "black") {
       val gstate = new PdfGState
       
@@ -516,7 +516,7 @@ object Composer extends Controller {
       //gstate.setFillOpacity(0.5f)
       canvas.setGState(gstate)
       canvas.setColorFill(new BaseColor(0.1f, 0.1f, 0.1f))
-      canvas.rectangle(0f, 0f, 1000f, 1000f)
+      canvas.rectangle(0f, 0f, pageSize.getWidth(), pageSize.getHeight())
       canvas.fill
       
       val gstate2 = new PdfGState
@@ -524,7 +524,7 @@ object Composer extends Controller {
       gstate2.setFillOpacity(0.5f)
       canvas.setGState(gstate2)
       canvas.setColorFill(new BaseColor(0.2f, 0.2f, 0.2f))
-      canvas.rectangle(0f, 0f, 1500f, 1500f)
+      canvas.rectangle(0f, 0f, pageSize.getWidth(), pageSize.getHeight())
       canvas.fill
       
       //  ...correct hilights...
@@ -538,7 +538,7 @@ object Composer extends Controller {
       })
       canvas.setGState(gstate)
       canvas.setColorFill(interpretColour(colour))
-      canvas.rectangle(0f, 0f, 1000f, 1000f)
+      canvas.rectangle(0f, 0f, pageSize.getWidth(), pageSize.getHeight())
       canvas.fill
     }
   }
@@ -612,7 +612,7 @@ object Composer extends Controller {
       val baseLayer = new PdfLayer("Character Sheet", writer);
       canvas.beginLayer(baseLayer)
       canvas.setColorFill(BaseColor.WHITE)
-      canvas.rectangle(0f, 0f, 1000f, 1000f)
+      canvas.rectangle(0f, 0f, pageSize.getWidth(), pageSize.getHeight())
       canvas.fill
 
       //  the page
@@ -624,7 +624,7 @@ object Composer extends Controller {
       //  generic image
       writeIconic(canvas, writer, page.slot, "public/images/iconics/generic.png", character)
 
-      writeColourOverlay(canvas, colour)
+      writeColourOverlay(canvas, colour, pageSize)
 
       canvas.endLayer()
 
