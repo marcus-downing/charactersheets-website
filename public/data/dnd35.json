@@ -129,6 +129,12 @@
                 { "file": "GM/Maps/3D/Raster/Square A4.pdf", "name": "Map - Square Grid A4 Portrait", "slot": "grid-a4" }
             ]
         },
+        "kingdom": [
+            { "file": "GM/Kingdom/Kingdom.pdf", "name": "Kingdom", "slot": "kingdom" },
+            { "file": "GM/Kingdom/Settlement.pdf", "name": "Settlement", "slot": "settlement", "variant": "normal" },
+            { "file": "GM/Kingdom/Settlement large.pdf", "name": "Settlement (large)", "slot": "settlement", "variant": "large" },
+            { "file": "GM/Kingdom/Settlement without map.pdf", "name": "Settlement (without map)", "slot": "settlement", "variant": "text" }
+        ],
         "aps": []
     },
 
