@@ -17,6 +17,8 @@ object GameData {
   def parse(json: JsValue) = GameData(
       game = (json \ "game").as[String],
       name = (json \ "name").as[String],
+      skills = (json \ "skills").as[List[JsObject]].map(parseSkill),
+      coreSkills = (json \ "coreSkills").as[List[String]],
       pages = (json \ "pages").as[List[JsObject]].map(parsePage),
       gm = parseGM((json \ "gm").as[JsObject]),
       base = parseBaseData((json \ "base").as[JsObject]),
@@ -24,6 +26,19 @@ object GameData {
       books = (json \ "books").as[List[JsObject]].map(parseBook),
       languages = (json \ "languages").as[List[JsObject]].map(parseLanguageInfo),
       classes = (json \ "classes").as[List[JsObject]].map(parseBaseClass)
+    )
+
+  def parseSkill(json: JsObject) = Skill(
+      name = (json \ "name").as[String],
+      ability = (json \ "ability").asOpt[String].getOrElse(""),
+      useUntrained = (json \ "useUntrained").asOpt[Boolean].getOrElse(false),
+      acp = (json \ "acp").asOpt[Boolean].getOrElse(false),
+      subSkillOf = (json \ "subSkillOf").asOpt[String],
+      optional = (json \ "optional").asOpt[Boolean].getOrElse(false),
+      afterFold = (json \ "afterFold").asOpt[Boolean].getOrElse(false),
+      noRage = (json \ "noRage").asOpt[Boolean].getOrElse(false),
+      favouredEnemy = (json \ "favouredEnemy").asOpt[Boolean].getOrElse(false),
+      favouredTerrain = (json \ "favouredTerrain").asOpt[Boolean].getOrElse(false)
     )
 
   def parsePage(json: JsObject) = Page(
@@ -74,19 +89,23 @@ object GameData {
     name = (json \ "name").as[String],
     pages = (json \ "pages").as[List[String]],
     variants = (json \ "variants").asOpt[List[JsObject]].getOrElse(Nil).map(parseVariant),
-    axes = (json \ "axes").asOpt[List[List[String]]].getOrElse(Nil)
+    axes = (json \ "axes").asOpt[List[List[String]]].getOrElse(Nil),
+    skills = (json \ "skills").asOpt[List[String]].getOrElse(Nil)
   )
 
   def parseVariant(json: JsObject) = VariantClass(
     name = (json \ "name").as[String],
     pages = (json \ "pages").as[List[String]],
-    axes = (json \ "axes").asOpt[List[String]].getOrElse(Nil)
+    axes = (json \ "axes").asOpt[List[String]].getOrElse(Nil),
+    skills = (json \ "skills").asOpt[List[String]].getOrElse(Nil)
   )
 }
 
 case class GameData (
   game: String,
   name: String,
+  skills: List[Skill],
+  coreSkills: List[String],
   pages: List[Page],
   gm: GM,
   base: BaseData,
@@ -104,6 +123,8 @@ case class GameData (
   def bookByName(name: String) = books.filter(_.name == name).headOption
 
   def slugOf(str: String) = str.toLowerCase.replaceAll("[^a-z]+", " ").trim.replace(" ", "-")
+
+  def getSkill(name: String): Option[Skill] = skills.filter(_.name == name).headOption
 }
 
 case class GM (
@@ -149,11 +170,13 @@ trait GameClass {
   def name: String
   def pages: List[String]
   def code = name.replaceAll("[^a-zA-Z]+", "-")
+  def skills: List[String]
 }
 
 case class BaseClass (
   name: String,
   pages: List[String],
+  skills: List[String] = Nil,
   variants: List[VariantClass] = Nil,
   axes: List[List[String]] = Nil
 ) extends GameClass {
@@ -168,9 +191,10 @@ case class BaseClass (
 case class VariantClass (
   name: String,
   pages: List[String],
-  axes: List[String] = Nil
+  axes: List[String] = Nil,
+  skills: List[String] = Nil
 ) extends GameClass {
-  def mergeInto(base: BaseClass) = new BaseClass(name, base.pages ::: pages)
+  def mergeInto(base: BaseClass) = new BaseClass(name, base.pages ::: pages, base.skills ::: skills)
 }
 
 case class LanguageInfo (
@@ -179,3 +203,20 @@ case class LanguageInfo (
   name: String,
   ready: List[Float]
 )
+
+case class Skill (
+  name: String,
+  ability: String,
+
+  useUntrained: Boolean,
+  acp: Boolean,
+  subSkillOf: Option[String],
+  optional: Boolean,
+  afterFold: Boolean,
+
+  noRage: Boolean,
+  favouredEnemy: Boolean,
+  favouredTerrain: Boolean
+) {
+  def isSubSkill = subSkillOf != None
+}

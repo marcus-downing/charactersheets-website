@@ -67,8 +67,8 @@ object Composer extends Controller {
 
       case Some("gm") =>
         val gm = if(gameData.isDnd35) "Dungeon Master" else "Game Master"
-        val gmPages = data.get("gm-start-type").getOrElse("")
-        val name = gmPages match {
+        val gmPageSet = data.get("gm-start-type").getOrElse("")
+        val name = gmPageSet match {
           case "characters" => "Characters and NPCs"
           case "campaign" => "Campaign Planning"
           case "maps" => "Maps"
@@ -77,13 +77,13 @@ object Composer extends Controller {
         }
 
         if (name == "") {
-          println("Unknown GM pages: "+gmPages)
+          println("Unknown GM pages: "+gmPageSet)
           NotFound
         } else {
           println("Showing "+gm+" - "+name)
 
           val gmdata = CharacterData.parseGM(data, gameData)
-          val pdf = composeGM(gmdata, gameData, gmPages, sourceFolders)
+          val pdf = composeGM(gmdata, gameData, gmPageSet, sourceFolders)
           Ok(pdf).as("application/pdf").withHeaders(
             "Content-disposition" -> ("attachment; filename=\""+gm+" - "+name+".pdf\"")
           )
@@ -100,7 +100,7 @@ object Composer extends Controller {
     }
   }
 
-  def composeGM(gmdata: GMData, gameData: GameData, gmPages: String, folders: List[File]): Array[Byte] = {
+  def composeGM(gmdata: GMData, gameData: GameData, gmPageSet: String, folders: List[File]): Array[Byte] = {
     val out = new ByteArrayOutputStream()
     val document = new Document
     val writer = PdfWriter.getInstance(document, out)
@@ -169,8 +169,14 @@ object Composer extends Controller {
       }
     }
 
-    val pages: List[Page] = gmPages match {
-      case "characters" => gameData.gm.characters
+    val pages: List[Page] = gmPageSet match {
+      case "characters" => 
+        val pages = gameData.gm.characters
+        println("Looking for party sheet for "+Some(gmdata.numPCs)+" PCs")
+        val party = pages.filter{p => println(" - "+p.slot+" / "+p.variant); p.slot == "party" && p.variant == Some(gmdata.numPCs.toString)}.headOption
+        println(" - Found: "+party)
+        val otherPages = pages.filter(p => p.slot != "party")
+        party.toList ::: otherPages
       case "campaign" => gameData.gm.campaign
       case "maps" => 
         if (gmdata.maps3d) gameData.gm.maps.maps3d else gameData.gm.maps.maps2d
@@ -180,7 +186,7 @@ object Composer extends Controller {
         val settlement = gameData.gm.kingdom.filter(p => p.slot == "settlement" && p.variant == Some(gmdata.settlementStyle))
         kingdom ::: settlement ::: Nil
       case _ => 
-        println("Unknown GM pages: "+gmPages)
+        println("Unknown GM pages: "+gmPageSet)
         Nil
     }
     placeGMPages(pages)
@@ -282,6 +288,10 @@ object Composer extends Controller {
       if (!iconic.isDefined && !character.hasCustomIconic)
         writeIconic(canvas, writer, page.slot, "public/images/iconics/generic.png", character)
 
+      // skills
+      // if (page.slot == "core")
+      //   writeSkills(canvas, writer, page, gameData, character)
+
       // variant rules
       if (!character.variantRules.isEmpty) {
         if (character.variantRules.contains("wounds-vigour")) {
@@ -328,7 +338,7 @@ object Composer extends Controller {
 
       //  watermark
       if (character.watermark != "") {
-        writeWatermark(canvas, writer, character.watermark, colour)
+        writeWatermark(canvas, writer, character.watermark, colour, pageSize)
       }
 
       fis.close
@@ -354,7 +364,7 @@ object Composer extends Controller {
 
     //  copyright notice
     canvas.setColorFill(new BaseColor(0.5f, 0.5f, 0.5f))
-    val font = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.EMBEDDED)
+    val font = textFont
 
     canvas.beginText
     val copyrightLayer = new PdfLayer("Iconic image", writer)
@@ -375,6 +385,163 @@ object Composer extends Controller {
     }
     canvas.endLayer
     canvas.endText
+  }
+
+  //  1mm = 2.8pt
+  def writeSkills(canvas: PdfContentByte, writer: PdfWriter, page: Page,  gameData: GameData, character: CharacterData) {
+    println("Core skills: "+gameData.coreSkills.mkString(", "))
+    println("Class skills: "+character.classes.flatMap(_.skills).mkString(", "))
+    val classSkills = character.classes.flatMap(_.skills).distinct
+    val skills = (gameData.coreSkills ::: classSkills).distinct.flatMap { name =>
+      gameData.getSkill(name)
+    }
+    println("Writing skills: "+skills.map(_.name))
+    val (beforeFold, afterFold) = skills.filter(!_.isSubSkill).partition(_.afterFold)
+    val skillsToWrite = afterFold ::: beforeFold
+
+    val subskillsBySkill: Map[String, List[Skill]] = skills.filter(_.isSubSkill).groupBy(_.subSkillOf.getOrElse(""))
+
+    //  set values up
+    val skillFont = textFont
+    val skillFontSize = 8f
+    val attrFont = altFont
+    val attrFontSize = 10.4f
+    val stdColour = new BaseColor(0.4f, 0.4f, 0.4f)
+    val fillColour = new BaseColor(0.6f, 0.6f, 0.6f)
+    val attrColour = stdColour
+    val fadedGState = new PdfGState
+    fadedGState.setBlendMode(PdfGState.BM_NORMAL)
+    fadedGState.setFillOpacity(0.3f)
+
+    val skillPoints = getSkillPoints(page)
+    import skillPoints._
+
+    // write it
+    var pos = 0
+    var foldWritten = false
+    for (skill <- skillsToWrite) {
+
+      // draw the fold
+      if (skill.afterFold && !foldWritten) {
+        val liney = firstLine + pos * lineIncrement + lineBottomOffset
+        canvas.setColorFill(stdColour)
+        canvas.setGState(defaultGstate)
+        canvas.setLineWidth(0.5f)
+        canvas.moveTo(skillsAreaLeft, liney)
+        canvas.lineTo(skillsAreaRight, liney)
+        canvas.stroke()
+        foldWritten = true
+      }
+
+      def writeCheckbox(x: Float, y: Float, filled: Boolean) {
+        val radius = 2.4f
+
+        if (filled) {
+          canvas.setColorFill(fillColour)
+          canvas.setGState(defaultGstate)
+          canvas.rectangle(x, y, radius * 2f, radius * 2f)
+          canvas.fill()
+        }
+
+        canvas.setColorStroke(stdColour)
+        canvas.setGState(defaultGstate)
+        canvas.setLineWidth(0.5f)
+        canvas.rectangle(x, y, radius * 2f, radius * 2f)
+        canvas.stroke()
+      }
+
+      def writeSkillLine(skill: Skill, isSubSkill: Boolean) {
+        val y = firstLine + pos * lineIncrement
+        val nameLeft = if (isSubSkill) skillNameLeft + skillNameIndent else skillNameLeft
+        canvas.setFontAndSize(skillFont, skillFontSize)
+        canvas.setColorFill(stdColour)
+        canvas.setGState(defaultGstate)
+        canvas.showTextAligned(Element.ALIGN_LEFT, skill.name, nameLeft, y, 0)
+
+        if (skill.useUntrained) {
+          writeCheckbox(useUntrainedMiddle, y, true)
+        }
+
+        val ability = if (skill.ability.length > 0) skill.ability else "/"
+        canvas.setFontAndSize(attrFont, attrFontSize)
+        canvas.setColorFill(attrColour)
+        canvas.setGState(fadedGState)
+        canvas.showTextAligned(Element.ALIGN_CENTER, ability, abilityMiddle, y + abilityOffset, 0)
+
+        if (!isSubSkill)
+          writeCheckbox(classSkillMiddle, y, classSkills.contains(skill.name))
+
+        if (isSubSkill) {
+          canvas.setFontAndSize(attrFont, attrFontSize - 2)
+          canvas.setColorFill(attrColour)
+          canvas.setGState(fadedGState)
+          canvas.showTextAligned(Element.ALIGN_CENTER, "/", ranksMiddle, y + abilityOffset / 2, 0)
+        }
+
+        if (skill.acp) {
+          canvas.setColorFill(stdColour)
+          canvas.setFontAndSize(attrFont, attrFontSize)
+          canvas.showTextAligned(Element.ALIGN_CENTER, "-", skillsAreaRight - acpWidth - 5, y, 0)
+
+          canvas.setColorStroke(stdColour)
+          canvas.setLineWidth(0.5f)
+          canvas.setLineDash(2f, 2f)
+          canvas.rectangle(skillsAreaRight - acpWidth, y + lineBottomOffset, acpWidth, lineBoxHeight)
+          canvas.stroke()
+
+          canvas.setLineDash(0f)
+        }
+
+        pos = pos + 1
+      }
+
+      writeSkillLine(skill, false)
+
+      //  subskills
+      if (subskillsBySkill.contains(skill.name)) {
+        for (subskill <- subskillsBySkill(skill.name)) {
+          writeSkillLine(subskill, true)
+        }
+      }
+    }
+
+    // for (n <- )
+  }
+
+  case class SkillPoints (firstLine: Float, lineIncrement: Float, lineBottomOffset: Float, lineBoxHeight: Float, skillsAreaLeft: Float, skillsAreaRight: Float, 
+    skillNameLeft: Float, skillNameIndent: Float, abilityMiddle: Float, abilityOffset: Float, ranksMiddle: Float,
+    useUntrainedMiddle: Float, classSkillMiddle: Float, acpWidth: Float)
+  def getSkillPoints(page: Page): SkillPoints = {
+    println("Skill points for page variant: "+page.variant)
+    val isBarbarian = page.variant == Some("barbarian")
+    val isRanger = page.variant == Some("ranger")
+    val isMore = page.variant == Some("more")
+
+    val firstLine = if (page.variant == "more") 500f else 603f
+    val lineIncrement = -13.55f
+    val lineBottomOffset = -4f
+    val lineBoxHeight = 14f
+
+    val skillsAreaLeft = 231f
+    val skillsAreaRight = 566f
+
+    val skillNameLeft = skillsAreaLeft + 2f
+    val skillNameIndent = 16f
+    val abilityMiddle = 
+      if (isBarbarian) 395f 
+      else if (isRanger) 388f
+      else 410f
+    println("Ability middle: "+abilityMiddle)
+    val ranksMiddle = abilityMiddle + 55
+    val abilityOffset = -1f
+
+    val useUntrainedMiddle = abilityMiddle - 52f
+    val classSkillMiddle = abilityMiddle + 25f
+    val acpWidth = 25f
+
+    SkillPoints(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
+      skillNameLeft, skillNameIndent, abilityMiddle, abilityOffset, ranksMiddle,
+      useUntrainedMiddle, classSkillMiddle, acpWidth)
   }
 
   def writeIconic(canvas: PdfContentByte, writer: PdfWriter, slot: String, imgFilename: String, character: CharacterData) {
@@ -488,7 +655,7 @@ object Composer extends Controller {
     }
   }
 
-  def writeWatermark(canvas: PdfContentByte, writer: PdfWriter, watermark: String, colour: String) {
+  def writeWatermark(canvas: PdfContentByte, writer: PdfWriter, watermark: String, colour: String, pageSize: Rectangle) {
     println("Adding watermark: "+watermark)
 
     val watermarkGstate = new PdfGState
@@ -503,7 +670,13 @@ object Composer extends Controller {
     canvas.setFontAndSize(font, (900f / watermark.length).toInt)
     //canvas.setColorFill(new BaseColor(0f, 0f, 0f))
     canvas.setColorFill(interpretColour(colour))
-    canvas.showTextAligned(Element.ALIGN_CENTER, watermark, 365f, 400f, 60f)
+
+    val isPortrait = pageSize.getHeight() > pageSize.getWidth()
+    val x = pageSize.getWidth() / 2 + (if (isPortrait) 60f else 30f)
+    val y = pageSize.getHeight() / 2 - (if (isPortrait) 30f else 60f)
+    val angle = if (isPortrait) 60f else 30f
+    canvas.showTextAligned(Element.ALIGN_CENTER, watermark, x, y, angle)
+    // canvas.showTextAligned(Element.ALIGN_CENTER, watermark, 365f, 400f, 60f)
     canvas.endLayer
     canvas.endText
   }
@@ -542,6 +715,10 @@ object Composer extends Controller {
       canvas.fill
     }
   }
+
+  def textFont = BaseFont.createFont("public/fonts/Roboto-Condensed.ttf", BaseFont.CP1252, true)
+  def textFontBold = BaseFont.createFont("public/fonts/Roboto-BoldCondensed.ttf", BaseFont.CP1252, true)
+  def altFont = BaseFont.createFont("public/fonts/Merriweather-Black.ttf", BaseFont.CP1252, true)
 
   def interpretColour(colour: String): BaseColor = colour match {
     case "light" => new BaseColor(0.3f, 0.3f, 0.3f)
@@ -649,7 +826,7 @@ object Composer extends Controller {
 
       //  watermark
       if (character.watermark != "") {
-        writeWatermark(canvas, writer, character.watermark, colour)
+        writeWatermark(canvas, writer, character.watermark, colour, pageSize)
       }
 
       fis.close
@@ -680,7 +857,7 @@ class CharacterInterpretation(gameData: GameData, character: CharacterData) {
     }
 
   def selectCharacterPages(classes: List[GameClass]): List[Page] = {
-    //println(" -- Classes: "+classes.map(_.name).mkString(", "))
+    println(" -- Classes: "+classes.map(_.name).mkString(", "))
     val basePages = gameData.base.pages.toList.map(pageSlot)
     val classPages = classes.flatMap(_.pages).map(pageSlot)
 

@@ -94,6 +94,7 @@ object CharacterData {
       logo = Logo.get(data.get("logo").getOrElse(gameData.game)),
 
       gmCampaign = positive.contains("gm-campaign"),
+      numPCs = data.get("num-pcs").map(_.toInt).getOrElse(4),
       maps = positive.contains("maps"),
       maps3d = data.get("maps-view").getOrElse("3d") == "3d",
       settlementStyle = data.get("settlement-style").getOrElse("normal"),
@@ -108,6 +109,7 @@ case class GMData (
   logo: Option[Logo],
 
   gmCampaign: Boolean,
+  numPCs: Int,
   maps: Boolean,
   maps3d: Boolean,
   settlementStyle: String,

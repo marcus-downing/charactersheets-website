@@ -2,6 +2,55 @@
     "game": "pathfinder",
     "name": "Pathfinder RPG",
 
+    "skills": [
+        { "name": "Acrobatics", "ability": "DEX", "useUntrained": true, "acp": true },
+        { "name": "Appraise", "ability": "INT", "useUntrained": true, "noRage": true },
+        { "name": "Bluff", "ability": "CHA", "useUntrained": true, "noRage": true, "favouredEnemy": true },
+        { "name": "Climb", "ability": "STR", "useUntrained": true, "acp": true },
+        { "name": "Diplomacy", "ability": "CHA", "useUntrained": true, "noRage": true },
+        { "name": "Disable Device", "ability": "DEX", "noRage": true, "acp": true },
+            { "name": "Disarm Traps", "subSkillOf": "Disable Device", "optional": true },
+        { "name": "Disguise", "ability": "CHA", "useUntrained": true, "noRage": true },
+        { "name": "Escape Artist", "ability": "DEX", "useUntrained": true, "acp": true, "noRage": true },
+        { "name": "Fly", "ability": "DEX", "useUntrained": true, "acp": true },
+        { "name": "Handle Animal", "ability": "CHA", "noRage": true },
+        { "name": "Heal", "ability": "WIS", "useUntrained": true },
+        { "name": "Intimidate", "ability": "CHA", "useUntrained": true },
+        { "name": "Linguistics", "ability": "INT", "noRage": true },
+        { "name": "Perception", "ability": "WIS", "useUntrained": true, "favouredEnemy": true, "favouredTerrain": true },
+            { "name": "Locate Traps", "subSkillOf": "Perception", "optional": true },
+        { "name": "Ride", "ability": "DEX", "useUntrained": true, "acp": true },
+        { "name": "Sense Motive", "ability": "WIS", "useUntrained": true },
+        { "name": "Sleight of Hand", "ability": "DEX", "acp": true, "noRage": true },
+        { "name": "Spellcraft", "ability": "INT", "noRage": true },
+        { "name": "Stealth", "ability": "DEX", "useUntrained": true, "acp": true, "noRage": true, "favouredTerrain": true },
+        { "name": "Survival", "ability": "WIS", "useUntrained": true, "favouredEnemy": true, "favouredTerrain": true },
+            { "name": "Track", "subSkillOf": "Survival", "optional": true, "noRage": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Swim", "ability": "STR", "useUntrained": true, "acp": true },
+        { "name": "Use Magic Device", "ability": "CHA", "noRage": true },
+
+        { "name": "Knowledge (arcana)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (dungeoneering)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (engineering)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (geography)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (history)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (local)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (nature)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (nobility)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (psionics)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (planes)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (religion)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        
+        { "name": "Autohypnosis", "ability": "WIS" }
+    ],
+
+    "coreSkills": [
+        "Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Disable Device", "Disguise",
+        "Escape Artist", "Fly", "Handle Animal", "Heal", "Intimidate", "Linguistics", "Perception",
+        "Ride", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Survival", "Swim",
+        "Use Magic Device"
+    ],
+
     "pages": [
         { "file": "Core/Character Info.pdf", "slot": "core", "name": "Character Info" },
         { "file": "Core/Combat.pdf", "slot": "combat", "name": "Combat" },
@@ -99,7 +148,8 @@
             { "file": "Archetypes/Druid/World Walker (Domain).pdf", "slot": "druid", "variant": "worldwalker/domain", "name": "World Walker (Domain)" },
                 { "file": "Archetypes/Druid/World Walker - Character Info.pdf", "slot": "core", "variant": "worldwalker", "name": "Character Info" },
 
-        { "file": "Core/Fighter.pdf", "slot": "fighter", "name": "Fighter" },
+        { "file": "Core/Fighter.pdf", "slot": "fighter", "variant": "melee", "name": "Fighter (Melee)" },
+            { "file": "Core/Fighter (Ranged).pdf", "slot": "fighter", "variant": "ranged", "name": "Fighter (Ranged)" },
 
         { "file": "Core/Monk/Monk - Combat.pdf", "slot": "combat", "variant": "monk", "name": "Monk", "position": 11 },
           { "file": "Core/Monk.pdf", "slot": "monk", "name": "Monk" },
@@ -225,6 +275,19 @@
         { "file": "Tome of Secrets/Shaman.pdf", "slot": "shaman", "name": "Shaman" },
         { "file": "Tome of Secrets/Witch Hunter.pdf", "slot": "witchhunter", "name": "Witch Hunter" },
 
+        { "file": "Prestige Classes/Arcane Archer.pdf", "slot": "prestige", "variant": "arcanearcher", "name": "Arcane Archer" },
+        { "file": "Prestige Classes/Arcane Trickster.pdf", "slot": "prestige", "variant": "arcanetrickster", "name": "Arcane Trickster" },
+        { "file": "Prestige Classes/Assassin.pdf", "slot": "prestige", "variant": "assassin", "name": "Assassin" },
+        { "file": "Prestige Classes/Dragon Disciple.pdf", "slot": "prestige", "variant": "dragondisciple", "name": "Dragon Disciple" },
+        { "file": "Prestige Classes/Duelist.pdf", "slot": "prestige", "variant": "duelist", "name": "Duelist" },
+        { "file": "Prestige Classes/Eldritch Knight.pdf", "slot": "prestige", "variant": "eldritchknight", "name": "Eldritch Knight" },
+        { "file": "Prestige Classes/Loremaster.pdf", "slot": "prestige", "variant": "loremaster", "name": "Loremaster" },
+        { "file": "Prestige Classes/Mystic Theurge.pdf", "slot": "prestige", "variant": "mystictheurge", "name": "Mystic Theurge" },
+        { "file": "Prestige Classes/Pathfinder Chronicler.pdf", "slot": "prestige", "variant": "pathfinderchronicler", "name": "Pathfinder Chronicler" },
+            { "file": "Prestige Classes/Pathfinder Chronicler - L4.pdf", "slot": "pathfinderchroniclerl4", "name": "Pathfinder Chronicler - L4" },
+            { "file": "Prestige Classes/Pathfinder Chronicler - L5.pdf", "slot": "pathfinderchroniclerl5", "name": "Pathfinder Chronicler - L5" },
+        { "file": "Prestige Classes/Shadowdancer.pdf", "slot": "prestige", "variant": "shadowdancer", "name": "Shadowdancer" },
+
         { "file": "Mythic/Archmage.pdf", "slot": "mythic", "variant": "archmage", "name": "Archmage" },
         { "file": "Mythic/Champion.pdf", "slot": "mythic", "variant": "champion", "name": "Champion" },
         { "file": "Mythic/Guardian.pdf", "slot": "mythic", "variant": "guardian", "name": "Guardian" },
@@ -265,9 +328,15 @@
 
     "gm": {
         "characters": [
-            { "file": "GM/Party.pdf", "name": "Party" },
-            { "file": "GM/NPC.pdf", "name": "NPC" },
-            { "file": "GM/NPC Group.pdf", "name": "NPC Group" }
+            { "file": "GM/Party 4.pdf", "name": "Party", "slot": "party", "variant": "4" },
+            { "file": "GM/Party 5.pdf", "name": "Party", "slot": "party", "variant": "5" },
+            { "file": "GM/Party 6.pdf", "name": "Party", "slot": "party", "variant": "6" },
+            { "file": "GM/Party 7.pdf", "name": "Party", "slot": "party", "variant": "7" },
+            { "file": "GM/Party 8.pdf", "name": "Party", "slot": "party", "variant": "8" },
+            { "file": "GM/Party 9.pdf", "name": "Party", "slot": "party", "variant": "9" },
+            { "file": "GM/Party 10.pdf", "name": "Party", "slot": "party", "variant": "10" },
+            { "file": "GM/NPC.pdf", "name": "NPC", "slot": "npc" },
+            { "file": "GM/NPC Group.pdf", "name": "NPC Group", "slot": "npc-party" }
         ],
         "campaign": [
             { "file": "GM/Timeline (Portrait).pdf", "name": "Timeline (Portrait)" },
@@ -317,7 +386,7 @@
     },
 
     "layout": [
-        [ "Core Rulebook", "Advanced Player's Guide" ],
+        [ "Core Rulebook", "Advanced Player's Guide", "Prestige Classes" ],
         [ "Ultimate Magic", "Ultimate Combat", "Advanced Class Guide", "Mythic Adventures", "Tome of Secrets" ],
         [ "Psionics Unleashed", "Psionics Expanded", "NeoExodus", "Generic" ]
     ],
@@ -362,6 +431,11 @@
         },
 
         {
+            "name": "Prestige Classes",
+            "classes": [ "Prestige" ]
+        },
+
+        {
             "name": "Mythic Adventures",
             "classes": [ "Mythic" ]
         },
@@ -396,6 +470,7 @@
         {
             "name": "Barbarian",
             "pages": [ "core/barbarian", "combat/barbarian", "barbarian", "inventory/without" ],
+            "skills": [ "Acrobatics", "Climb", "Handle Animal", "Intimidate", "Knowledge (nature)", "Perception", "Ride", "Survival", "Swim" ],
             "variants": [
                 { "name": "Barbarian", "pages": [ ] },
                 { "name": "Armoured Hulk", "pages": [ "barbarian/armouredhulk" ] },
@@ -420,6 +495,7 @@
         {
             "name": "Bard",
             "pages": [ "bard", "inventory", "spellbook" ],
+            "skills": [ "Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Disguise", "Escape Artist", "Intimidate", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Perception", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Use Magic Device" ],
             "variants": [
                 { "name": "Bard", "pages": [ ] },
                 { "name": "Animal Speaker", "pages": [ "bard/animalspeaker" ] },
@@ -448,6 +524,7 @@
         {
             "name": "Cleric",
             "pages": [ "cleric", "inventory", "spellbook" ],
+            "skills": [ "Appraise", "Diplomacy", "Heal", "Knowledge (arcana)", "Knowledge (history)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Sense Motive", "Spellcraft" ],
             "sections": [ "domain" ],
             "variants": [
                 { "name": "Cleric", "pages": [ ] },
@@ -465,6 +542,7 @@
         {
             "name": "Druid",
             "pages": [ "druid", "inventory/without", "wildshape", "spellbook" ],
+            "skills": [ "Climb", "Fly", "Handle Animal", "Heal", "Knowledge (geography)", "Knowledge (nature)", "Perception", "Ride", "Spellcraft", "Survival", "Swim" ],
             "axes": [
                 ["Druid", "Shaman", "Menhir Savant", "Mooncaller", "Pack Lord", "Reincarnated", "Aquatic", "Arctic", "Blight", "Cave", "Desert", "Jungle", "Mountain", "Plains", "Swamp", "Storm", "Urban", "World Walker"],
                 ["Animal Companion", "Domain"]
@@ -508,12 +586,22 @@
 
         {
             "name": "Fighter",
-            "pages": [ "fighter", "inventory" ]
+            "pages": [ "fighter", "inventory" ],
+            "skills": [ "Climb", "Handle Animal", "Intimidate", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Ride", "Survival", "Swim" ],
+            "axes": [
+                ["Fighter"],
+                ["Melee", "Ranged"]
+            ],
+            "variants": [
+                { "name": "Fighter (Melee)", "pages": [ "fighter/melee" ], "axes": ["Fighter", "Melee"] },
+                { "name": "Fighter (Ranged)", "pages": [ "fighter/ranged" ], "axes": ["Fighter", "Ranged"] }
+            ]
         },
 
         {
             "name": "Monk",
             "pages": [ "combat/monk", "monk", "inventory" ],
+            "skills": [ "Acrobatics", "Climb", "Escape Artist", "Intimidate", "Knowledge (history)", "Knowledge (religion)", "Perception", "Profession", "Ride", "Sense Motive", "Stealth", "Swim" ],
             "variants": [
                 { "name": "Monk", "pages": [ ] },
                 { "name": "Drunken Master", "pages": [ "monk/drunkenmaster" ] },
@@ -539,6 +627,7 @@
         {
             "name": "Paladin",
             "pages": [ "paladin", "inventory/without", "spellbook" ],
+            "skills": [ "Acrobatics", "Climb", "Escape Artist", "Intimidate", "Knowledge (history)", "Knowledge (religion)", "Perception", "Profession", "Ride", "Sense Motive", "Stealth", "Swim" ],
             "variants": [
                 { "name": "Paladin", "pages": [ ] },
                 { "name": "Antipaladin", "pages": [ "paladin/antipaladin" ] },
@@ -571,6 +660,7 @@
         {
             "name": "Ranger",
             "pages": [ "core/ranger", "combat/ranger", "ranger", "inventory/without", "spellbook" ],
+            "skills": [ "Climb", "Handle Animal", "Heal", "Intimidate", "Knowledge (dungeoneering)", "Knowledge (geography)", "Knowledge (nature)", "Perception", "Ride", "Spellcraft", "Stealth", "Survival", "Swim", "Track"],
             "variants": [
                 { "name": "Ranger", "pages": [ ] },
                 { "name": "Battle Scout", "pages": [ "ranger/battlescout" ] },
@@ -594,6 +684,7 @@
         {
             "name": "Rogue",
             "pages": [ "rogue", "inventory" ],
+            "skills": [ "Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Intimidate", "Knowledge (dungeoneering)", "Knowledge (local)", "Linguistics", "Perception", "Profession", "Sense Motive", "Sleight of Hand", "Stealth", "Swim", "Use Magic Device", "Disarm Traps", "Locate Traps" ],
             "variants": [
                 { "name": "Rogue", "pages": [ ] },
                 { "name": "Scout", "pages": [ "rogue/scout" ] }
@@ -603,6 +694,7 @@
         {
             "name": "Sorcerer",
             "pages": [ "sorcerer", "inventory/without", "spellbook", "animalcompanion" ],
+            "skills": [ "Appraise", "Bluff", "Fly", "Intimidate", "Knowledge (arcana)", "Spellcraft", "Use Magic Device" ],
             "variants": [
                 { "name": "Sorcerer", "pages": [ ] },
                 { "name": "Crossblooded Sorcerer", "pages": [ "sorcerer/crossblooded" ] },
@@ -615,110 +707,158 @@
 
         {
             "name": "Wizard",
-            "pages": [ "wizard", "inventory/without", "spellbook", "animalcompanion" ]
+            "pages": [ "wizard", "inventory/without", "spellbook", "animalcompanion" ],
+            "skills": [ "Appraise", "Fly", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Spellcraft" ]
         },
 
         {
             "name": "Alchemist",
-            "pages": [ "alchemist", "inventory", "spellbook" ]
+            "pages": [ "alchemist", "inventory", "spellbook" ],
+            "skills": [ "Appraise", "Disable Device", "Fly", "Heal", "Knowledge (arcana)", "Knowledge (nature)", "Perception", "Sleight of Hand", "Spellcraft", "Survival", "Use Magic Device" ]
         },
 
         {
             "name": "Cavalier",
-            "pages": [ "cavalier", "inventory", "animalcompanion" ]
+            "pages": [ "cavalier", "inventory", "animalcompanion" ],
+            "skills": [ "Bluff", "Climb", "Diplomacy", "Handle Animal", "Intimidate", "Ride", "Sense Motive", "Swim" ]
         },
 
          {
             "name": "Inquisitor",
-            "pages": [ "inquisitor", "inventory", "spellbook" ]
+            "pages": [ "inquisitor", "inventory", "spellbook" ],
+            "skills": [ "Bluff", "Climb", "Diplomacy", "Disguise", "Heal", "Intimidate", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (nature)", "Knowledge (planes)", "Knowledge (religion)", "Perception", "Ride", "Sense Motive", "Spellcraft", "Stealth", "Survival", "Swim" ]
         },
 
         {
             "name": "Oracle",
-            "pages": [ "oracle", "inventory", "spellbook" ]
+            "pages": [ "oracle", "inventory", "spellbook" ],
+            "skills": [ "Diplomacy", "Heal", "Knowledge (history)", "Knowledge (planes)", "Knowledge (religion)", "Sense Motive", "Spellcraft" ]
         },
 
         {
             "name": "Summoner",
-            "pages": [ "summoner", "eidolon", "eidoloncombat", "inventory", "spellbook" ]
+            "pages": [ "summoner", "eidolon", "eidoloncombat", "inventory", "spellbook" ],
+            "skills": [ "Fly", "Handle Animal", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Ride", "Spellcraft", "Use Magic Device" ]
         },
 
         {
             "name": "Witch",
-            "pages": [ "witch", "inventory", "animalcompanion", "spellbook" ]
+            "pages": [ "witch", "inventory", "animalcompanion", "spellbook" ],
+            "skills": [ "Fly", "Heal", "Intimidate", "Knowledge (arcana)", "Knowledge (history)", "Knowledge (nature)", "Knowledge (planes)", "Spellcraft", "Use Magic Device" ]
         },
 
         {
             "name": "Magus",
-            "pages": [ "magus", "inventory", "spellbook" ]
+            "pages": [ "magus", "inventory", "spellbook" ],
+            "skills": [ "Climb", "Fly", "Intimidate", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (planes)", "Ride", "Spellcraft", "Swim", "Use Magic Device" ]
         },
 
         {
             "name": "Gunslinger",
-            "pages": [ "gunslinger", "inventory" ]
+            "pages": [ "gunslinger", "inventory" ],
+            "skills": [ "Acrobatics", "Bluff", "Climb", "Handle Animal", "Heal", "Intimidate", "Knowledge (engineering)", "Knowledge (local)", "Perception", "Ride", "Sleight of Hand", "Survival", "Swim" ]
         },
 
         {
             "name": "Ninja",
-            "pages": [ "ninja", "inventory" ]
+            "pages": [ "ninja", "inventory" ],
+            "skills": [ "Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Intimidate", "Knowledge (local)", "Knowledge (nobility)", "Linguistics", "Perception", "Sense Motive", "Sleight of Hand", "Stealth", "Swim", "Use Magic Device" ]
         },
 
         {
             "name": "Arcanist",
-            "pages": [ "arcanist", "inventory", "spellbook" ]
+            "pages": [ "arcanist", "inventory", "spellbook" ],
+            "skills": [ "Appraise", "Fly", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Spellcraft", "Use Magic Device" ]
         },
 
         {
             "name": "Bloodrager",
-            "pages": [ "core/barbarian", "combat/barbarian", "bloodrager", "inventory", "spellbook" ]
+            "pages": [ "core/barbarian", "combat/barbarian", "bloodrager", "inventory", "spellbook" ],
+            "skills": [ "Acrobatics", "Climb", "Handle Animal", "Intimidate", "Knowledge (arcana)", "Perception", "Ride", "Spellcraft", "Survival", "Swim" ]
         },
 
         {
             "name": "Brawler",
-            "pages": [ "brawler", "inventory" ]
+            "pages": [ "brawler", "inventory" ],
+            "skills": [ "Acrobatics", "Climb", "Escape Artist", "Handle Animal", "Intimidate", "Knowledge (dungeoneering)", "Knowledge (local)", "Perception", "Ride", "Sense Motive", "Swim" ]
         },
 
         {
             "name": "Hunter",
-            "pages": [ "hunter", "inventory" ]
+            "pages": [ "hunter", "inventory" ],
+            "skills": [ "Climb", "Handle Animal", "Heal", "Intimidate", "Knowledge (dungeoneering)", "Knowledge (geography)", "Knowledge (nature)", "Perception", "Ride", "Spellcraft", "Stealth", "Survival", "Swim", "Track" ]
         },
 
         {
             "name": "Investigator",
-            "pages": [ "investigator", "inventory" ]
+            "pages": [ "investigator", "inventory" ],
+            "skills": [ "Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Heal", "Intimidate", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Perception", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Use Magic Device", "Locate Traps", "Disarm Traps" ]
         },
 
         {
             "name": "Shaman",
-            "pages": [ "shaman", "inventory", "spellbook" ]
+            "pages": [ "shaman", "inventory", "spellbook" ],
+            "skills": [ "Diplomacy", "Fly", "Handle Animal", "Heal", "Knowledge (nature)", "Knowledge (planes)", "Knowledge (religion)", "Ride", "Spellcraft", "Survival" ]
         },
 
         {
             "name": "Skald",
-            "pages": [ "skald", "inventory" ]
+            "pages": [ "skald", "inventory" ],
+            "skills": [ "Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Escape Artist", "Handle Animal", "Intimidate", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Perception", "Ride", "Sense Motive", "Spellcraft", "Swim", "Use Magic Device" ]
         },
 
         {
             "name": "Slayer",
-            "pages": [ "slayer", "inventory" ]
+            "pages": [ "slayer", "inventory" ],
+            "skills": [ "Acrobatics", "Bluff", "Climb", "Disguise", "Heal", "Intimidate", "Knowledge (dungeoneering)", "Knowledge (geography)", "Knowledge (local)", "Perception", "Ride", "Sense Motive", "Stealth", "Survival", "Swim", "Track" ]
         },
 
         {
             "name": "Swashbuckler",
-            "pages": [ "swashbuckler", "inventory" ]
+            "pages": [ "swashbuckler", "inventory" ],
+            "skills": [ "Acrobatics", "Bluff", "Climb", "Diplomacy", "Escape Artist", "Intimidate", "Knowledge (local)", "Knowledge (nobility)", "Perception", "Ride", "Sense Motive", "Sleight of Hand", "Swim" ]
         },
 
         {
             "name": "Warpriest",
-            "pages": [ "warpriest", "inventory", "spellbook" ]
+            "pages": [ "warpriest", "inventory", "spellbook" ],
+            "skills": [ "Climb", "Diplomacy", "Handle Animal", "Heal", "Intimidate", "Knowledge (engineering)", "Knowledge (religion)", "Ride", "Sense Motive", "Spellcraft", "Survival", "Swim" ]
         },
 
         {
             "name": "Samurai",
             "pages": [ "samurai", "inventory" ],
+            "skills": [ "Bluff", "Climb", "Diplomacy", "Handle Animal", "Intimidate", "Ride", "Sense Motive", "Swim" ],
             "variants": [
                 { "name": "Samurai", "pages": [ ] },
-                { "name": "Ronin", "pages": [ "samurai/ronin" ] }
+                { "name": "Ronin", "pages": [ "samurai/ronin" ], "skills": [ "Knowledge (local)", "Survival" ] }
+            ]
+        },
+
+        {
+            "name": "Prestige",
+            "pages": [ "inventory" ],
+            "variants": [
+                { "name": "Arcane Archer", "pages": [ "prestige/arcanearcher"], 
+                    "skills": [ "Perception", "Ride", "Stealth", "Survival" ] },
+                { "name": "Arcane Trickster", "pages": [ "prestige/arcanetrickster"], 
+                    "skills": [ "Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Disciple Device", "Disguise", "Escape Artist", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Perception", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Swim" ] },
+                { "name": "Assassin", "pages": [ "prestige/assassin"], 
+                    "skills": [ "Acrobatics", "Bluff", "Climb", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Intimidate", "Linguistics", "Perception", "Sense Motive", "Sleight of Hand", "Stealth", "Swim", "Use Magic Device" ] },
+                { "name": "Dragon Disciple", "pages": [ "prestige/dragondisciple"], 
+                    "skills": [ "Diplomacy", "Escape Artist", "Fly", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Perception", "Spellcraft" ] },
+                { "name": "Duelist", "pages": [ "prestige/duelist"],
+                    "skills": [ "Acrobatics", "Bluff", "Escape Artist", "Perception", "Sense Motive" ] },
+                { "name": "Eldritch Knight", "pages": [ "prestige/eldritchknight"],
+                    "skills": [ "Climb", "Knowledge (arcana)", "Knowledge (nobility)", "Linguistics", "Ride", "Sense Motive", "Spellcraft", "Swim" ] },
+                { "name": "Loremaster", "pages": [ "prestige/loremaster"],
+                    "skills": [ "Appraise", "Diplomacy", "Handle Animal", "Heal", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Spellcraft", "Use Magic Device" ] },
+                { "name": "Mystic Theurge", "pages": [ "prestige/mystictheurge"],
+                    "skills": [ "Knowledge (arcana)", "Knowledge (religion)", "Sense Motive", "Spellcraft" ] },
+                { "name": "Pathfinder Chronicler", "pages": [ "prestige/pathfinderchronicler", "pathfinderchroniclerl4", "pathfinderchroniclerl5"],
+                    "skills": [ "Appraise", "Bluff", "Diplomacy", "Disguise", "Escape Artist", "Intimidate", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Perception", "Ride", "Sense Motive", "Sleight of Hand", "Survival", "Use Magic Device" ] },
+                { "name": "Shadowdancer", "pages": [ "prestige/shadowdancer"],
+                    "skills": [ "Acrobatics", "Bluff", "Diplomacy", "Disguise", "Escape Artist", "Perception", "Sleight of Hand", "Stealth" ] }
             ]
         },
 
@@ -757,32 +897,38 @@
 
         {
             "name": "Aegis",
-            "pages": [ "aegis", "core/psionic", "inventory/psionic" ]
+            "pages": [ "aegis", "core/psionic", "inventory/psionic" ],
+            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
         },
 
         {
             "name": "Cryptic",
-            "pages": [ "cryptic", "core/psionic", "inventory/psionic" ]
+            "pages": [ "cryptic", "core/psionic", "inventory/psionic" ],
+            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
         },
 
         {
             "name": "Dread",
-            "pages": [ "dread", "core/psionic", "inventory/psionic" ]
+            "pages": [ "dread", "core/psionic", "inventory/psionic" ],
+            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
         },
 
         {
             "name": "Marksman",
-            "pages": [ "marksman", "core/psionic", "inventory/psionic" ]
+            "pages": [ "marksman", "core/psionic", "inventory/psionic" ],
+            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
         },
 
         {
             "name": "Tactician",
-            "pages": [ "tactician", "core/psionic", "inventory/psionic" ]
+            "pages": [ "tactician", "core/psionic", "inventory/psionic" ],
+            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
         },
 
         {
             "name": "Vitalist",
-            "pages": [ "vitalist", "core/psionic", "inventory/psionic" ]
+            "pages": [ "vitalist", "core/psionic", "inventory/psionic" ],
+            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
         },
 
         {

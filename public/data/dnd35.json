@@ -2,6 +2,61 @@
     "game": "dnd35",
     "name": "Dungeons & Dragons 3.5",
 
+    "skills": [
+        { "name": "Appraise", "ability": "INT", "useUntrained": true, "noRage": true },
+        { "name": "Autohypnosis", "ability": "WIS", "useUntrained": true },
+        { "name": "Balance", "ability": "DEX", "useUntrained": true, "acp": true },
+        { "name": "Bluff", "ability": "CHA", "useUntrained": true, "noRage": true },
+        { "name": "Climb", "ability": "STR", "useUntrained": true, "acp": true },
+        { "name": "Concentration", "ability": "CON", "useUntrained": true, "noRage": true },
+        { "name": "Decipher Script", "ability": "INT", "noRage": true },
+        { "name": "Diplomacy", "ability": "CHA", "useUntrained": true, "noRage": true },
+        { "name": "Disable Device", "ability": "DEX", "noRage": true },
+        { "name": "Disguise", "ability": "CHA", "useUntrained": true, "noRage": true },
+        { "name": "Escape Artist", "ability": "DEX", "useUntrained": true, "acp": true },
+        { "name": "Forgery", "ability": "INT", "useUntrained": true, "noRage": true },
+        { "name": "Gather Information", "ability": "CHA", "useUntrained": true, "noRage": true },
+        { "name": "Handle Animal", "ability": "CHA", "noRage": true },
+        { "name": "Heal", "ability": "WIS", "useUntrained": true },
+        { "name": "Hide", "ability": "DEX", "useUntrained": true, "acp": true, "noRage": true },
+        { "name": "Intimidate", "ability": "CHA", "useUntrained": true },
+        { "name": "Jump", "ability": "STR", "useUntrained": true, "acp": true },
+        { "name": "Listen", "ability": "WIS", "useUntrained": true },
+        { "name": "Move Silently", "ability": "DEX", "useUntrained": true, "acp": true, "noRage": true },
+        { "name": "Open Lock", "ability": "DEX", "noRage": true },
+        { "name": "Ride", "ability": "DEX", "useUntrained": true },
+        { "name": "Search", "ability": "WIS", "useUntrained": true },
+        { "name": "Sense Motive", "ability": "WIS", "useUntrained": true },
+        { "name": "Sleight of Hand", "ability": "DEX", "acp": true, "noRage": true },
+        { "name": "Spellcraft", "ability": "INT", "noRage": true },
+        { "name": "Spot", "ability": "WIS", "useUntrained": true },
+        { "name": "Survival", "ability": "WIS", "useUntrained": true },
+            { "name": "Track", "subSkillOf": "Survival", "optional": true, },
+        { "name": "Swim", "ability": "STR", "useUntrained": true, "acp": true },
+        { "name": "Tumble", "ability": "DEX", "noRage": true, "acp": true },
+        { "name": "Use Magic Device", "ability": "CHA", "noRage": true },
+        { "name": "Use Rope", "ability": "DEX", "useUntrained": true, "noRage": true },
+
+        { "name": "Knowledge (arcana)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (dungeoneering)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (engineering)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (geography)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (history)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (local)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (nature)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (nobility)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (religion)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (planes)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (psionics)", "ability": "INT", "afterTheFold": "true" },
+    ],
+
+    "coreSkills": [
+        "Appraise", "Balance", "Bluff", "Climb", "Decipher Script", "Diplomacy", "Disable Device", "Disguise", 
+        "Escape Artist", "Forgery", "Gather Information", "Handle Animal", "Heal", "Hide", "Intimidate", 
+        "Jump", "Listen", "Move Silently", "Open Lock", "Ride", "Search", "Sense Motive", "Sleight of Hand", 
+        "Spellcraft", "Spot", "Survival", "Swim", "Tumble", "Use Magic Device", "Use Rope"
+    ],
+
     "pages": [
         { "file": "Core/Character Info - simple.pdf", "slot": "core", "variant": "simple", "name": "simplified", "position": 15 },
         { "file": "Core/Combat.pdf - simple", "slot": "combat", "variant": "simple", "name": "simplified", "position": 16 },
@@ -100,9 +155,15 @@
 
     "gm": {
         "characters": [
-            { "file": "GM/Party.pdf", "name": "Party" },
-            { "file": "GM/NPC.pdf", "name": "NPC" },
-            { "file": "GM/NPC Group.pdf", "name": "NPC Group" }
+            { "file": "GM/Party 4.pdf", "name": "Party", "slot": "party", "variant": "4" },
+            { "file": "GM/Party 5.pdf", "name": "Party", "slot": "party", "variant": "5" },
+            { "file": "GM/Party 6.pdf", "name": "Party", "slot": "party", "variant": "6" },
+            { "file": "GM/Party 7.pdf", "name": "Party", "slot": "party", "variant": "7" },
+            { "file": "GM/Party 8.pdf", "name": "Party", "slot": "party", "variant": "8" },
+            { "file": "GM/Party 9.pdf", "name": "Party", "slot": "party", "variant": "9" },
+            { "file": "GM/Party 10.pdf", "name": "Party", "slot": "party", "variant": "10" },
+            { "file": "GM/NPC.pdf", "name": "NPC", "slot": "npc" },
+            { "file": "GM/NPC Group.pdf", "name": "NPC Group", "slot": "npc-group" }
         ],
         "campaign": [
             { "file": "GM/Timeline (Portrait).pdf", "name": "Timeline (Portrait)" },
@@ -246,17 +307,20 @@
     "classes": [
         {
             "name": "Barbarian",
-            "pages": [ "core/barbarian", "combat/barbarian", "inventory/without" ]
+            "pages": [ "core/barbarian", "combat/barbarian", "inventory/without" ],
+            "skills": [ "Climb", "Handle Animal", "Intimidate", "Jump", "Listen", "Ride", "Survival", "Swim" ]
         },
 
         {
             "name": "Bard",
-            "pages": [ "bard", "inventory/without", "spellbook" ]
+            "pages": [ "bard", "inventory/without", "spellbook" ],
+            "skills": [ "Appraise", "Balance", "Bluff", "Climb", "Concentration", "Decipher Script", "Escape Artist", "Gather Information", "Hide", "Jump", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (religion)", "Knowledge (planes)", "Listen", "Move Silently", "Sense Motive", "Slight of Hand", "Spellcraft", "Swim", "Tumble", "Use Magic Device" ]
         },
 
         {
             "name": "Cleric",
             "pages": [ "cleric", "inventory/without", "spellbook" ],
+            "skills": [ "Concentration", "Diplomacy", "Heal", "Knowledge (arcana)", "Knowledge (history)", "Knowledge (religion)", "Knowledge (planes)", "Spellcraft" ],
             "variants": [
                 { "name": "Cleric", "pages": [ ] },
                 {
@@ -269,22 +333,26 @@
 
         {
             "name": "Druid",
-            "pages": [ "druid", "wildshape", "inventory/without", "animalcompanion", "spellbook" ]
+            "pages": [ "druid", "wildshape", "inventory/without", "animalcompanion", "spellbook" ],
+            "skills": [ "Concentration", "Diplomacy", "Handle Animal", "Heal", "Knowledge (nature)", "Listen", "Ride", "Spellcraft", "Spot", "Survival", "Swim" ]
         },
 
         {
             "name": "Fighter",
-            "pages": [ ]
+            "pages": [ ],
+            "skills": [ "Climb", "Handle Animal", "Intimidate", "Jump", "Ride", "Swim" ]
         },
 
         {
             "name": "Monk",
-            "pages": [ "monk" ]
+            "pages": [ "monk" ],
+            "skills": [ "Balance", "Climb", "Concentration", "Diplomacy", "Escape Artist", "Hide", "Jump", "Knowledge (arcana)", "Knowledge (religion)", "Listen", "Move Silently", "Sense Motive", "Spot", "Swim", "Tumble" ]
         },
 
         {
             "name": "Paladin",
             "pages": [ "paladin", "inventory/without", "spellbook" ],
+            "skills": [ "Concentration", "Diplomacy", "Handle Animal", "Heal", "Knowledge (nobility)", "Knowledge (religion)", "Ride", "Sense Motive" ],
             "variants": [
                 { "name": "Paladin", "pages": [ ] },
                 {
@@ -297,17 +365,20 @@
 
         {
             "name": "Ranger",
-            "pages": [ "ranger", "animalcompanion", "spellbook" ]
+            "pages": [ "ranger", "animalcompanion", "spellbook" ],
+            "skills": [ "Climb", "Concentration", "Handle Animal", "Heal", "Hide", "Jump", "Knowledge (dungeoneering)", "Knowledge (geography)", "Knowledge (nature)", "Listen", "Move Silently", "Ride", "Search", "Spot", "Survival", "Swim", "Use Rope" ]
         },
 
         {
             "name": "Rogue",
-            "pages": [ ]
+            "pages": [ ],
+            "skills": [ "Appraise", "Balance", "Bluff", "Climb", "Decipher Script", "Diplomacy", "Disable Device", "Disguise", "Escape Artist", "Forgery", "Gather Information", "Hide", "Intimidate", "Jump", "Knowledge (local)", "Listen", "Move Silently", "Open Lock", "Search", "Sense Motive", "Sleight of Hand", "Spot", "Swim", "Tumble", "Use Magic Device", "Use Rope" ]
         },
 
         {
             "name": "Sorcerer",
             "pages": [ "sorcerer", "inventory/without", "spellbook", "animalcompanion" ],
+            "skills": [ "Bluff", "Concentration", "Knowledge (arcana)", "Spellcraft" ],
             "variants": [
                 { "name": "Sorcerer", "pages": [ ] },
                 {
@@ -320,6 +391,7 @@
         {
             "name": "Wizard",
             "pages": [ "wizard", "inventory/without", "spellbook", "animalcompanion" ],
+            "skills": [ "Concentration", "Decipher Script", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (religion)", "Knowledge (planes)", "Spellcraft" ],
             "variants": [
                 { "name": "Wizard", "pages": [ ] },
                 {
