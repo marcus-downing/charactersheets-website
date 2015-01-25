@@ -29,19 +29,25 @@
         { "name": "Swim", "ability": "STR", "useUntrained": true, "acp": true },
         { "name": "Use Magic Device", "ability": "CHA", "noRage": true },
 
-        { "name": "Knowledge (arcana)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (dungeoneering)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (engineering)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (geography)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (history)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (local)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (nature)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (nobility)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (psionics)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (planes)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
-        { "name": "Knowledge (religion)", "ability": "INT", "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (arcana)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (dungeoneering)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (engineering)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (geography)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (history)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (local)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (nature)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (nobility)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (psionics)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (planes)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
+        { "name": "Knowledge (religion)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true },
         
-        { "name": "Autohypnosis", "ability": "WIS" }
+        { "name": "Concentration (INT)", "displayName": "Concentration", "ability": "INT", "noRage": true },
+        { "name": "Concentration (WIS)", "displayName": "Concentration", "ability": "WIS", "noRage": true },
+        { "name": "Concentration (CHA)", "displayName": "Concentration", "ability": "CHA", "noRage": true },
+
+        { "name": "Autohypnosis", "ability": "WIS" },
+
+        { "name": "Knowledge (aeronautics)", "ability": "INT", "noRage": true, "afterFold": true, "favouredEnemy": true, "favouredTerrain": true }
     ],
 
     "coreSkills": [
@@ -49,6 +55,10 @@
         "Escape Artist", "Fly", "Handle Animal", "Heal", "Intimidate", "Linguistics", "Perception",
         "Ride", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Survival", "Swim",
         "Use Magic Device"
+    ],
+
+    "knowledgeSkills": [
+        "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)"
     ],
 
     "pages": [
@@ -256,7 +266,6 @@
         { "file": "Advanced Class Guide/Warpriest.pdf", "slot": "warpriest", "name": "Warpriest" },
 		
 		
-        { "file": "Psionics/Psionics - Character Info.pdf", "slot": "core", "variant": "psionic", "name": "Character Info (Psionic)", "position": 10 },
         { "file": "Psionics/Psionics - Inventory.pdf", "slot": "inventory", "variant": "psionic", "name": "Inventory (Psionic)", "position": 53 },
         { "file": "Psionics/Psion.pdf", "slot": "psion", "name": "Psion" },
         { "file": "Psionics/Psychic Warrior.pdf", "slot": "psychicwarrior", "name": "Psychic Warrior" },
@@ -877,58 +886,62 @@
 
         {
             "name": "Psion",
-            "pages": [ "psion", "core/psionic", "inventory/psionic" ]
+            "pages": [ "psion", "inventory/psionic" ],
+            "skills": [ "Autohypnosis", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (psionics)", "Knowledge (planes)", "Knowledge (religion)", "Spellcraft" ]
         },
 
         {
             "name": "Psychic Warrior",
-            "pages": [ "psychicwarrior", "core/psionic", "inventory/psionic" ]
+            "pages": [ "psychicwarrior", "inventory/psionic" ],
+            "skills": [ "Acrobatics", "Autohypnosis", "Climb", "Knowledge (psionics)", "Perception", "Ride", "Spellcraft", "Swim" ]
         },
 
         {
             "name": "Soulknife",
-            "pages": [ "soulknife", "core/psionic", "inventory/psionic" ]
+            "pages": [ "soulknife", "inventory/psionic" ],
+            "skills": [ "Acrobatics", "Autohypnosis", "Climb", "Intimidate", "Knowledge (psionics)", "Perception", "Stealth", "Swim" ]
         },
 
         {
             "name": "Wilder",
-            "pages": [ "wilder", "core/psionic", "inventory/psionic" ]
+            "pages": [ "wilder", "inventory/psionic" ],
+            "skills": [ "Acrobatics", "Autohypnosis", "Bluff", "Climb", "Diplomacy", "Escape Artist", "Intimidate", "Knowledge (psionics)", "Perception", "Sense Motive", "Spellcraft", "Swim", "Use Magic Device" ]
         },
 
         {
             "name": "Aegis",
-            "pages": [ "aegis", "core/psionic", "inventory/psionic" ],
-            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
+            "pages": [ "aegis", "inventory/psionic" ],
+            "skills": [ "Acrobatics", "Autohypnosis", "Climb", "Knowledge (psionics)", "Spellcraft", "Swim", "Use Magic Device" ]
         },
 
         {
             "name": "Cryptic",
-            "pages": [ "cryptic", "core/psionic", "inventory/psionic" ],
-            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
+            "pages": [ "cryptic", "inventory/psionic" ],
+            "skills": [ "Acrobatics", "Appraise", "Autohypnosis", "Climb", "Disable Device", "Disguise", "Escape Artist", "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (psionics)", "Knowledge (planes)", "Knowledge (religion)", "Linguistics", "Perception", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Swim", "Use Magic Device", "Disarm Traps", "Locate Traps" ]
         },
 
         {
             "name": "Dread",
-            "pages": [ "dread", "core/psionic", "inventory/psionic" ],
-            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
+            "pages": [ "dread", "inventory/psionic" ],
+            "skills": [ "Acrobatics", "Autohypnosis", "Bluff", "Climb", "Escape Artist", "Intimidate", "Knowledge (psionics)", "Perception", "Stealth", "Spellcraft", "Sense Motive", "Swim" ]
         },
 
         {
             "name": "Marksman",
-            "pages": [ "marksman", "core/psionic", "inventory/psionic" ],
-            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
+            "pages": [ "marksman", "inventory/psionic" ],
+            "skills": [ "Acrobatics", "Autohypnosis", "Climb", "Escape Artist", "Intimidate", "Knowledge (psionics)", "Perception", "Sense Motive", "Stealth", "Survival", "Use Magic Device" ]
         },
 
         {
             "name": "Tactician",
-            "pages": [ "tactician", "core/psionic", "inventory/psionic" ],
-            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
+            "pages": [ "tactician", "inventory/psionic" ],
+            "skills": [ "Autohypnosis", "Bluff", "Climb", "Diplomacy", "Intimidate", "Knowledge (engineering)", "Knowledge (history)", "Knowledge (psionics)", "Linguistics", "Perception", "Ride", "Sense Motive", "Spellcraft", "Swim", "Use Magic Device" ]
         },
 
         {
             "name": "Vitalist",
-            "pages": [ "vitalist", "core/psionic", "inventory/psionic" ],
-            "skills": [ "Autohypnosis", "Knowledge (psionics)" ]
+            "pages": [ "vitalist", "inventory/psionic" ],
+            "skills": [ "Autohypnosis", "Bluff", "Diplomacy", "Heal", "Intimidate", "Knowledge (history)", "Knowledge (local)", "Knowledge (psionics)", "Linguistics", "Perception", "Sense Motive", "Spellcraft", "Survival" ]
         },
 
         {

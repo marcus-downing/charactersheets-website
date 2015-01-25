@@ -19,6 +19,7 @@ object GameData {
       name = (json \ "name").as[String],
       skills = (json \ "skills").as[List[JsObject]].map(parseSkill),
       coreSkills = (json \ "coreSkills").as[List[String]],
+      knowledgeSkills = (json \ "knowledgeSkills").as[List[String]],
       pages = (json \ "pages").as[List[JsObject]].map(parsePage),
       gm = parseGM((json \ "gm").as[JsObject]),
       base = parseBaseData((json \ "base").as[JsObject]),
@@ -30,6 +31,7 @@ object GameData {
 
   def parseSkill(json: JsObject) = Skill(
       name = (json \ "name").as[String],
+      displayName = (json \ "displayName").asOpt[String],
       ability = (json \ "ability").asOpt[String].getOrElse(""),
       useUntrained = (json \ "useUntrained").asOpt[Boolean].getOrElse(false),
       acp = (json \ "acp").asOpt[Boolean].getOrElse(false),
@@ -106,6 +108,7 @@ case class GameData (
   name: String,
   skills: List[Skill],
   coreSkills: List[String],
+  knowledgeSkills: List[String],
   pages: List[Page],
   gm: GM,
   base: BaseData,
@@ -206,6 +209,7 @@ case class LanguageInfo (
 
 case class Skill (
   name: String,
+  displayName: Option[String],
   ability: String,
 
   useUntrained: Boolean,
@@ -219,4 +223,5 @@ case class Skill (
   favouredTerrain: Boolean
 ) {
   def isSubSkill = subSkillOf != None
+  def skillName = displayName.getOrElse(name)
 }

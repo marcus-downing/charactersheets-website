@@ -159,6 +159,9 @@
           </select></p>
         </div>
 
+          <p><label for="all-knowledge"><input type="checkbox" name="all-knowledge" id="all-knowledge" /> Include all knowledge skills</label></p>
+          <p class='info'>This reduces the space available for Craft, Profession and Perform skills. Bards get all knowledge skills anyway.</p>
+
         <h3>Additional pages</h3>
           <p><label for="include-background"><input type="checkbox" name="include-background" id="include-background" /> Character background</label></p>
           @if(gameData.isPathfinder) {
@@ -258,7 +261,7 @@
 
         <h3>Party</h3>
         <p><label for='num-pcs'>Party size:&nbsp; 
-          <select name='num-pcs' id='num-pcs'>
+          <select name='num-pcs' id='num-pcs' style='width: 60px; text-align: right;'>
             <option value='4'>4</option>
             <option value='5'>5</option>
             <option value='6'>6</option>
@@ -267,7 +270,7 @@
             <option value='9'>9</option>
             <option value='10'>10</option>
           </select> 
-          &nbps;player characters</label></p>
+          &nbsp;player characters</label></p>
       </div>
 
       <div id='gm-campaign-options' class='gm-options-section'>

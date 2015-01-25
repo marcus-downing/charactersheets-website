@@ -31,23 +31,25 @@
         { "name": "Spellcraft", "ability": "INT", "noRage": true },
         { "name": "Spot", "ability": "WIS", "useUntrained": true },
         { "name": "Survival", "ability": "WIS", "useUntrained": true },
-            { "name": "Track", "subSkillOf": "Survival", "optional": true, },
+            { "name": "Track", "subSkillOf": "Survival", "optional": true },
         { "name": "Swim", "ability": "STR", "useUntrained": true, "acp": true },
         { "name": "Tumble", "ability": "DEX", "noRage": true, "acp": true },
         { "name": "Use Magic Device", "ability": "CHA", "noRage": true },
         { "name": "Use Rope", "ability": "DEX", "useUntrained": true, "noRage": true },
 
-        { "name": "Knowledge (arcana)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (dungeoneering)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (engineering)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (geography)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (history)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (local)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (nature)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (nobility)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (religion)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (planes)", "ability": "INT", "afterTheFold": "true" },
-        { "name": "Knowledge (psionics)", "ability": "INT", "afterTheFold": "true" },
+        { "name": "Knowledge (arcana)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (dungeoneering)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (engineering)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (geography)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (history)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (local)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (nature)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (nobility)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (religion)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (planes)", "ability": "INT", "noRage": true, "afterFold": true },
+        { "name": "Knowledge (psionics)", "ability": "INT", "noRage": true, "afterFold": true },
+
+        { "name": "Knowledge (aeronautics)", "ability": "INT", "noRage": true, "afterTheFold": "true" }
     ],
 
     "coreSkills": [
@@ -55,6 +57,10 @@
         "Escape Artist", "Forgery", "Gather Information", "Handle Animal", "Heal", "Hide", "Intimidate", 
         "Jump", "Listen", "Move Silently", "Open Lock", "Ride", "Search", "Sense Motive", "Sleight of Hand", 
         "Spellcraft", "Spot", "Survival", "Swim", "Tumble", "Use Magic Device", "Use Rope"
+    ],
+
+    "knowledgeSkills": [
+        "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (religion)", "Knowledge (planes)"
     ],
 
     "pages": [
@@ -69,7 +75,6 @@
         { "file": "Core/Inventory.pdf", "slot": "inventory", "variant": "with", "name": "with accessories", "position": 53 },
         { "file": "Core/Inventory without.pdf", "slot": "inventory", "variant": "without", "name": "without accessories", "position": 53 },
 
-        { "file": "Psionics/Psionic Character Info.pdf", "slot": "core", "variant": "psionic", "name": "Psionic Character Info", "position": 15 },
         { "file": "Psionics/Psionic Combat.pdf", "slot": "combat", "variant": "psionic", "name": "Psionic Combat", "position": 16 },
         { "file": "Psionics/Psionic Inventory.pdf", "slot": "inventory", "variant": "psionic", "name": "Psionic Inventory", "position": 83 },
 
@@ -463,17 +468,17 @@
 
         {
             "name": "Ardent",
-            "pages": [ "core/psionic", "combat/psionic", "inventory/without", "ardent" ]
+            "pages": [ "combat/psionic", "inventory/without", "ardent" ]
         },
 
         {
             "name": "Divine Mind",
-            "pages": [ "core/psionic", "combat/psionic", "inventory/without", "divinemind" ]
+            "pages": [ "combat/psionic", "inventory/without", "divinemind" ]
         },
 
         {
             "name": "Lurk",
-            "pages": [ "core/psionic", "combat/psionic", "inventory/psionic", "lurk" ]
+            "pages": [ "combat/psionic", "inventory/psionic", "lurk" ]
         },
 
         {

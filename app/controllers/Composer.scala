@@ -135,6 +135,10 @@ object Composer extends Controller {
         //  the page
         canvas.addTemplate(template, 0, 0)
         writeCopyright(canvas, writer, gameData)
+
+        if (page.slot == "party" || page.slot == "npc-party")
+          writeSkills(canvas, writer, page, gameData, None)
+
         writeColourOverlay(canvas, gmdata.colour, pageSize)
         canvas.endLayer()
 
@@ -289,8 +293,8 @@ object Composer extends Controller {
         writeIconic(canvas, writer, page.slot, "public/images/iconics/generic.png", character)
 
       // skills
-      // if (page.slot == "core")
-      //   writeSkills(canvas, writer, page, gameData, character)
+      if (page.slot == "core")
+        writeSkills(canvas, writer, page, gameData, Some(character))
 
       // variant rules
       if (!character.variantRules.isEmpty) {
@@ -388,16 +392,22 @@ object Composer extends Controller {
   }
 
   //  1mm = 2.8pt
-  def writeSkills(canvas: PdfContentByte, writer: PdfWriter, page: Page,  gameData: GameData, character: CharacterData) {
-    println("Core skills: "+gameData.coreSkills.mkString(", "))
-    println("Class skills: "+character.classes.flatMap(_.skills).mkString(", "))
-    val classSkills = character.classes.flatMap(_.skills).distinct
-    val skills = (gameData.coreSkills ::: classSkills).distinct.flatMap { name =>
+  def writeSkills(canvas: PdfContentByte, writer: PdfWriter, page: Page,  gameData: GameData, character: Option[CharacterData]) {
+    val coreSkills = gameData.coreSkills
+    val classSkills: List[String] = character.map(_.classes.flatMap(_.skills).distinct).getOrElse(Nil)
+    val knowledgeSkills = if (character.map(_.allKnowledge).getOrElse(false)) gameData.knowledgeSkills else Nil
+    val bonusSkills = if (isAprilFool) "Knowledge (aeronautics)" :: Nil else Nil
+    println("Core skills: "+coreSkills.mkString(", "))
+    println("Class skills: "+classSkills.mkString(", "))
+    if (knowledgeSkills != Nil) println("Knowledge skills: "+knowledgeSkills.mkString(", "))
+    if (bonusSkills != Nil) println("Bonus skills: "+bonusSkills.mkString(", "))
+
+    val skills = (gameData.coreSkills ::: classSkills ::: knowledgeSkills ::: bonusSkills).distinct.flatMap { name =>
       gameData.getSkill(name)
     }
     println("Writing skills: "+skills.map(_.name))
-    val (beforeFold, afterFold) = skills.filter(!_.isSubSkill).partition(_.afterFold)
-    val skillsToWrite = afterFold ::: beforeFold
+    val (afterFold, beforeFold) = skills.filter(!_.isSubSkill).partition(_.afterFold)
+    val skillsToWrite = beforeFold.sortBy(_.skillName) ::: afterFold.sortBy(_.skillName)
 
     val subskillsBySkill: Map[String, List[Skill]] = skills.filter(_.isSubSkill).groupBy(_.subSkillOf.getOrElse(""))
 
@@ -406,58 +416,69 @@ object Composer extends Controller {
     val skillFontSize = 8f
     val attrFont = altFont
     val attrFontSize = 10.4f
+    val xFont = barbarianFont2
     val stdColour = new BaseColor(0.4f, 0.4f, 0.4f)
     val fillColour = new BaseColor(0.6f, 0.6f, 0.6f)
     val attrColour = stdColour
+    val white = new BaseColor(1f, 1f, 1f)
+    val black = new BaseColor(0f, 0f, 0f)
     val fadedGState = new PdfGState
     fadedGState.setBlendMode(PdfGState.BM_NORMAL)
     fadedGState.setFillOpacity(0.3f)
 
-    val skillPoints = getSkillPoints(page)
+    val skillPoints = getSkillPoints(page, gameData)
     import skillPoints._
 
-    // write it
-    var pos = 0
-    var foldWritten = false
-    for (skill <- skillsToWrite) {
+    def writeCheckbox(x: Float, y: Float, filled: Boolean) {
+      val radius = 2.4f
 
-      // draw the fold
-      if (skill.afterFold && !foldWritten) {
-        val liney = firstLine + pos * lineIncrement + lineBottomOffset
-        canvas.setColorFill(stdColour)
-        canvas.setGState(defaultGstate)
-        canvas.setLineWidth(0.5f)
-        canvas.moveTo(skillsAreaLeft, liney)
-        canvas.lineTo(skillsAreaRight, liney)
-        canvas.stroke()
-        foldWritten = true
+      if (filled) {
+        canvas.setColorFill(fillColour)
+      } else {
+        canvas.setColorFill(white)
       }
+      canvas.setGState(defaultGstate)
+      canvas.rectangle(x, y, radius * 2f, radius * 2f)
+      canvas.fill()
 
-      def writeCheckbox(x: Float, y: Float, filled: Boolean) {
-        val radius = 2.4f
+      canvas.setColorStroke(stdColour)
+      canvas.setGState(defaultGstate)
+      canvas.setLineWidth(0.5f)
+      canvas.rectangle(x, y, radius * 2f, radius * 2f)
+      canvas.stroke()
+    }
 
-        if (filled) {
-          canvas.setColorFill(fillColour)
-          canvas.setGState(defaultGstate)
-          canvas.rectangle(x, y, radius * 2f, radius * 2f)
-          canvas.fill()
-        }
+    def writeSkillLine(pos: Int, skill: Skill, isSubSkill: Boolean) {
+      val y = firstLine + pos * lineIncrement
+      val nameLeft = if (isSubSkill) skillNameLeft + skillNameIndent else skillNameLeft
+      canvas.setFontAndSize(skillFont, skillFontSize)
+      canvas.setColorFill(stdColour)
+      canvas.setGState(defaultGstate)
+      val displayName = skill.skillName
+      canvas.showTextAligned(Element.ALIGN_LEFT, displayName, nameLeft, y, 0)
+
+      if (isSubSkill) {
+        val top = firstLine + (pos - 1) * lineIncrement + lineBottomOffset
+        val bottom = firstLine + pos * lineIncrement + 2
+        val midv = (top + top + bottom) / 3f
+
+        val left = skillsAreaLeft + 7
+        val right = left + (top - bottom)
+        val midh = left + (top - bottom) * 2f / 3f
 
         canvas.setColorStroke(stdColour)
         canvas.setGState(defaultGstate)
         canvas.setLineWidth(0.5f)
-        canvas.rectangle(x, y, radius * 2f, radius * 2f)
+
+        canvas.moveTo(left, top)
+        canvas.lineTo(left, midv)
+        canvas.curveTo(left, bottom, left, bottom, midh, bottom)
+        // canvas.lineTo(midh, bottom)
+        canvas.lineTo(right, bottom)
         canvas.stroke()
       }
 
-      def writeSkillLine(skill: Skill, isSubSkill: Boolean) {
-        val y = firstLine + pos * lineIncrement
-        val nameLeft = if (isSubSkill) skillNameLeft + skillNameIndent else skillNameLeft
-        canvas.setFontAndSize(skillFont, skillFontSize)
-        canvas.setColorFill(stdColour)
-        canvas.setGState(defaultGstate)
-        canvas.showTextAligned(Element.ALIGN_LEFT, skill.name, nameLeft, y, 0)
-
+      if (page.slot == "core") {
         if (skill.useUntrained) {
           writeCheckbox(useUntrainedMiddle, y, true)
         }
@@ -468,80 +489,289 @@ object Composer extends Controller {
         canvas.setGState(fadedGState)
         canvas.showTextAligned(Element.ALIGN_CENTER, ability, abilityMiddle, y + abilityOffset, 0)
 
-        if (!isSubSkill)
-          writeCheckbox(classSkillMiddle, y, classSkills.contains(skill.name))
+        canvas.setGState(defaultGstate)
+
+        if (!isSubSkill) {
+          if (gameData.isPathfinder) {
+            writeCheckbox(classSkillMiddle, y, classSkills.contains(skill.name))
+          } else if (gameData.isDnd35) {
+            val nmax = if (page.variant == Some("more")) 7 else 5
+            for (i <- Range(0, nmax)) {
+              writeCheckbox(classSkillMiddle + classSkillIncrement * i, y, false)
+            }
+
+            for ( char <- character; (cls, i) <- char.classes.zipWithIndex) {
+              writeCheckbox(classSkillMiddle + classSkillIncrement * i, y, cls.skills.contains(skill.name))
+            }
+          }
+        }
 
         if (isSubSkill) {
           canvas.setFontAndSize(attrFont, attrFontSize - 2)
           canvas.setColorFill(attrColour)
           canvas.setGState(fadedGState)
           canvas.showTextAligned(Element.ALIGN_CENTER, "/", ranksMiddle, y + abilityOffset / 2, 0)
+          canvas.setGState(defaultGstate)
         }
 
         if (skill.acp) {
           canvas.setColorFill(stdColour)
           canvas.setFontAndSize(attrFont, attrFontSize)
-          canvas.showTextAligned(Element.ALIGN_CENTER, "-", skillsAreaRight - acpWidth - 5, y, 0)
+          canvas.showTextAligned(Element.ALIGN_CENTER, "-", skillsAreaRight - acpWidth - 5, y - 1, 0)
 
           canvas.setColorStroke(stdColour)
-          canvas.setLineWidth(0.5f)
+          val isAcpDouble = gameData.isDnd35 && skill.name == "Swim"
+          canvas.setLineWidth(if (isAcpDouble) 1.5f else 0.5f)
           canvas.setLineDash(2f, 2f)
           canvas.rectangle(skillsAreaRight - acpWidth, y + lineBottomOffset, acpWidth, lineBoxHeight)
           canvas.stroke()
 
           canvas.setLineDash(0f)
+
+          if (isAcpDouble) {
+            canvas.setFontAndSize(attrFont, attrFontSize - 2)
+            canvas.setColorFill(attrColour)
+            canvas.setGState(fadedGState)
+            canvas.showTextAligned(Element.ALIGN_CENTER, "x 2", skillsAreaRight - acpWidth / 2, y + abilityOffset / 2, 0)
+            canvas.setGState(defaultGstate)
+          }
         }
 
-        pos = pos + 1
-      }
+        if (page.variant == Some("barbarian") && skill.noRage) {
+          canvas.setColorFill(black)
+          canvas.setFontAndSize(xFont, skillFontSize)
+          canvas.showTextAligned(Element.ALIGN_CENTER, "X", rageMiddle, y - 1, 0)
+        }
 
-      writeSkillLine(skill, false)
+        if (page.variant == Some("ranger")) {
+          if (skill.favouredEnemy) {
+            canvas.setColorFill(stdColour)
+            // canvas.rectangle(favouredEnemyMiddle - 2, y, 4, 4)
+            canvas.moveTo(favouredEnemyMiddle - 2f, y)
+            canvas.curveTo(favouredEnemyMiddle - 1.5f, y + 1f, favouredEnemyMiddle - 1.5f, y + 3f, favouredEnemyMiddle - 2f, y + 4f)
+            canvas.curveTo(favouredEnemyMiddle - 1f, y + 3.5f, favouredEnemyMiddle + 1f, y + 3.5f, favouredEnemyMiddle + 2f, y + 4f)
+            canvas.curveTo(favouredEnemyMiddle + 1.5f, y + 3f, favouredEnemyMiddle + 1.5f, y + 1f, favouredEnemyMiddle + 2f, y)
+            canvas.curveTo(favouredEnemyMiddle + 1f, y + 0.5f, favouredEnemyMiddle - 1f, y + 0.5f, favouredEnemyMiddle - 2f, y)
+            canvas.fill()
+          }
+        }
 
-      //  subskills
-      if (subskillsBySkill.contains(skill.name)) {
-        for (subskill <- subskillsBySkill(skill.name)) {
-          writeSkillLine(subskill, true)
+        if (page.variant == Some("ranger") || page.variant == Some("worldwalker")) {
+          if (skill.favouredTerrain) {
+            canvas.setColorStroke(stdColour)
+            canvas.circle(favouredEnemyMiddle, y + 2, 4.5f)
+            canvas.setLineWidth(1.2f)
+            canvas.stroke()
+          }
+        }
+
+        def annotateSkill(sigil: String, line1: String, line2: String) {
+          val sigilr =
+            if (skill.acp) skillsAreaRight - acpWidth * 2
+            else skillsAreaRight - acpWidth + 3f
+          val linesl = sigilr + 2f
+
+          canvas.setColorFill(stdColour)
+          canvas.setFontAndSize(skillFont, 8f)
+          canvas.showTextAligned(Element.ALIGN_RIGHT, sigil, sigilr, y - 1f, 0)
+
+          canvas.setFontAndSize(skillFont, 4.5f)
+          canvas.showTextAligned(Element.ALIGN_LEFT, line1, linesl, y + 3f, 0)
+          canvas.showTextAligned(Element.ALIGN_LEFT, line2, linesl, y - 2f, 0)
+        }
+
+        if (gameData.isPathfinder) {
+          if (skill.name == "Intimidate") {
+            annotateSkill("±4", "if larger/", "smaller")
+            // canvas.setColorFill(stdColour)
+            // canvas.setFontAndSize(skillFont, 8f)
+            // canvas.showTextAligned(Element.ALIGN_RIGHT, "±4", skillsAreaRight - acpWidth + 4f, y - 2f, 0)
+
+            // canvas.setFontAndSize(skillFont, 4.5f)
+            // canvas.showTextAligned(Element.ALIGN_LEFT, "if larger/", skillsAreaRight - acpWidth + 7f, y + 3f, 0)
+            // canvas.showTextAligned(Element.ALIGN_LEFT, "smaller", skillsAreaRight - acpWidth + 7f, y - 2f, 0)
+          }
+        } else if (gameData.isDnd35) {
+          if (skill.name == "Intimidate") annotateSkill("+", "size", "diff x4")
+          if (skill.name == "Hide") annotateSkill("-", "size", "mod x4")
+          if (skill.name == "Swim") annotateSkill("-1", "per 5lb", "carried")
         }
       }
     }
 
-    // for (n <- )
+    // write it
+    var pos = 0
+    var foldWritten = false
+    for (skill <- skillsToWrite) {
+
+      // draw the fold
+      if (skill.afterFold && !foldWritten) {
+        val liney = firstLine + (pos - 1) * lineIncrement + lineBottomOffset
+        canvas.setColorFill(stdColour)
+        canvas.setGState(defaultGstate)
+        canvas.setLineWidth(1f)
+        canvas.moveTo(skillsAreaLeft, liney)
+        canvas.lineTo(skillsAreaRight, liney)
+        canvas.stroke()
+        foldWritten = true
+      }
+
+      writeSkillLine(pos, skill, false)
+      pos = pos + 1
+
+      //  subskills
+      if (subskillsBySkill.contains(skill.name)) {
+        for (subskill <- subskillsBySkill(skill.name)) {
+          writeSkillLine(pos, subskill, true)
+          pos = pos + 1
+        }
+      }
+    }
+
+    if (page.slot == "core") {
+      while (pos < numSlots) {
+        val y = firstLine + pos * lineIncrement
+        writeCheckbox(useUntrainedMiddle, y, false)
+        writeCheckbox(classSkillMiddle, y, false)
+        pos = pos + 1
+      }
+    }
+
   }
 
   case class SkillPoints (firstLine: Float, lineIncrement: Float, lineBottomOffset: Float, lineBoxHeight: Float, skillsAreaLeft: Float, skillsAreaRight: Float, 
     skillNameLeft: Float, skillNameIndent: Float, abilityMiddle: Float, abilityOffset: Float, ranksMiddle: Float,
-    useUntrainedMiddle: Float, classSkillMiddle: Float, acpWidth: Float)
-  def getSkillPoints(page: Page): SkillPoints = {
-    println("Skill points for page variant: "+page.variant)
-    val isBarbarian = page.variant == Some("barbarian")
-    val isRanger = page.variant == Some("ranger")
-    val isMore = page.variant == Some("more")
+    useUntrainedMiddle: Float, classSkillMiddle: Float, classSkillIncrement: Float, acpWidth: Float, numSlots: Int,
+    rageMiddle: Float, favouredEnemyMiddle: Float)
+  def getSkillPoints(page: Page, gameData: GameData): SkillPoints = page.slot match {
+    case "party" =>
+      val firstLine = 496f
+      val lineIncrement = -13.55f
+      val skillsAreaLeft = 28f
+      val skillsAreaRight = if (page.variant == "10") 39.5f else 40f
 
-    val firstLine = if (page.variant == "more") 500f else 603f
-    val lineIncrement = -13.55f
-    val lineBottomOffset = -4f
-    val lineBoxHeight = 14f
+      val skillNameLeft = skillsAreaLeft + 2f
+      val skillNameIndent = 16f
 
-    val skillsAreaLeft = 231f
-    val skillsAreaRight = 566f
+      val numSlots = 0
 
-    val skillNameLeft = skillsAreaLeft + 2f
-    val skillNameIndent = 16f
-    val abilityMiddle = 
-      if (isBarbarian) 395f 
-      else if (isRanger) 388f
-      else 410f
-    println("Ability middle: "+abilityMiddle)
-    val ranksMiddle = abilityMiddle + 55
-    val abilityOffset = -1f
+      SkillPoints(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+        skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
 
-    val useUntrainedMiddle = abilityMiddle - 52f
-    val classSkillMiddle = abilityMiddle + 25f
-    val acpWidth = 25f
+    case "npc-party" =>
+      val firstLine = 452.25f
+      val lineIncrement = -13.55f
+      val skillsAreaLeft = 28f
+      val skillsAreaRight = 40f
 
-    SkillPoints(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
-      skillNameLeft, skillNameIndent, abilityMiddle, abilityOffset, ranksMiddle,
-      useUntrainedMiddle, classSkillMiddle, acpWidth)
+      val skillNameLeft = skillsAreaLeft + 2f
+      val skillNameIndent = 16f
+
+      val numSlots = 0
+
+      SkillPoints(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+        skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
+
+
+    case _ if gameData.isPathfinder =>
+      println("Pathfinder skill points for page variant: "+page.slot+" / "+page.variant)
+      val isBarbarian = page.variant == Some("barbarian")
+      val isRanger = page.variant == Some("ranger")
+
+      val firstLine = 603f
+      val lineIncrement = -13.51f
+      val lineBottomOffset = -4.5f
+      val lineBoxHeight = 13f
+
+      val skillsAreaLeft = 231f
+      val skillsAreaRight = 567f
+
+      val skillNameLeft = skillsAreaLeft + 2f
+      val skillNameIndent = 16f
+      val abilityMiddle = 
+        if (isBarbarian) 395f 
+        else if (isRanger) 388f
+        else 410f
+      val abilityOffset = -1f
+
+      val ranksMiddle = 
+        if (isBarbarian) 448f
+        else if (isRanger) 443f
+        else 465f
+
+      val useUntrainedMiddle = 
+        if (isBarbarian) 341f
+        else if (isRanger) 335f
+        else 356f
+      val classSkillMiddle = 
+        if (isBarbarian) 419f
+        else if (isRanger) 413f
+        else 435f
+      val classSkillIncrement = 10f
+
+      val rageMiddle = 524f
+      val favouredEnemyMiddle = 524f
+      val acpWidth = 25f
+
+      val numSlots = 43
+
+      SkillPoints(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
+        skillNameLeft, skillNameIndent, abilityMiddle, abilityOffset, ranksMiddle,
+        useUntrainedMiddle, classSkillMiddle, classSkillIncrement, acpWidth, numSlots,
+        rageMiddle, favouredEnemyMiddle)
+    
+
+    case _ if gameData.isDnd35 =>
+      println("D&D 3.5 skill points for page variant: "+page.slot+" / "+page.variant)
+      val isBarbarian = page.variant == Some("barbarian")
+      val isRanger = page.variant == Some("ranger")
+      val isMore = page.variant == Some("more")
+      val isSimple = page.variant == Some("simple")
+
+      val firstLine: Float = 
+        if (isSimple) 615f
+        else if (isMore) 500f 
+        else 616f
+      val lineIncrement = -13.51f
+      val lineBottomOffset = -4.5f
+      val lineBoxHeight = 13f
+
+      val skillsAreaLeft = 231f
+      val skillsAreaRight = 567f
+
+      val skillNameLeft = skillsAreaLeft + 2f
+      val skillNameIndent = 16f
+      val abilityMiddle = 
+        if (isBarbarian) 395f 
+        else if (isRanger) 388f
+        else 383f
+      val abilityOffset = -1f
+
+      val ranksMiddle = 
+        if (isBarbarian) 448f
+        else if (isRanger) 443f
+        else 465f
+
+      val useUntrainedMiddle = 
+        if (isBarbarian) 320f
+        else if (isRanger) 310f
+        else 330f
+      val classSkillMiddle = 
+        if (isBarbarian) 370f
+        else if (isRanger) 370f
+        else 397.7f
+      val classSkillIncrement = 8f
+
+      val rageMiddle = 524f
+      val favouredEnemyMiddle = 524f
+      val acpWidth = 25f
+
+      val numSlots = 43
+
+      SkillPoints(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
+        skillNameLeft, skillNameIndent, abilityMiddle, abilityOffset, ranksMiddle,
+        useUntrainedMiddle, classSkillMiddle, classSkillIncrement, acpWidth, numSlots,
+        rageMiddle, favouredEnemyMiddle)
   }
 
   def writeIconic(canvas: PdfContentByte, writer: PdfWriter, slot: String, imgFilename: String, character: CharacterData) {
@@ -719,6 +949,8 @@ object Composer extends Controller {
   def textFont = BaseFont.createFont("public/fonts/Roboto-Condensed.ttf", BaseFont.CP1252, true)
   def textFontBold = BaseFont.createFont("public/fonts/Roboto-BoldCondensed.ttf", BaseFont.CP1252, true)
   def altFont = BaseFont.createFont("public/fonts/Merriweather-Black.ttf", BaseFont.CP1252, true)
+  def barbarianFont = BaseFont.createFont("public/fonts/Amatic-Bold.ttf", BaseFont.CP1252, true)
+  def barbarianFont2 = BaseFont.createFont("public/fonts/dirty-duo.ttf", BaseFont.CP1252, true)
 
   def interpretColour(colour: String): BaseColor = colour match {
     case "light" => new BaseColor(0.3f, 0.3f, 0.3f)
