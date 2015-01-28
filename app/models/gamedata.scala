@@ -127,7 +127,11 @@ case class GameData (
 
   def slugOf(str: String) = str.toLowerCase.replaceAll("[^a-z]+", " ").trim.replace(" ", "-")
 
-  def getSkill(name: String): Option[Skill] = skills.filter(_.name == name).headOption
+  def getSkill(name: String): Option[Skill] = {
+    val skill = skills.filter(_.name == name).headOption
+    if (skill == None) println(" * Unknown skill: "+name+"!")
+    skill
+  }
 }
 
 case class GM (

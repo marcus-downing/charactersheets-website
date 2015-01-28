@@ -319,6 +319,7 @@
         { "file": "Extra/Character Background - Pathfinder Society.pdf", "slot": "background", "variant": "pathfindersociety", "name": "Character Background (Pathfinder Society)" },
         { "file": "Extra/Lycanthrope.pdf", "slot": "lycanthrope", "name": "Lycanthrope" },
         { "file": "Core/Party Funds.pdf", "slot": "partyfunds", "name": "Party Funds" },
+        { "file": "Extra/Intelligent Item.pdf", "slot": "intelligent-item", "name": "Intelligent Item" },
         
         { "file": "Extra/Blank Spellcaster.pdf", "slot": "caster", "variant": "spontaneous", "name": "Spontaneous Caster" },
         { "file": "Extra/Blank Spellcaster 2.pdf", "slot": "caster", "variant": "vancian", "name": "Vancian Caster" },

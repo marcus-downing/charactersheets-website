@@ -33,7 +33,14 @@
     
 
     <section class='tab selected' id='start-tab'>
-      <h2 id='start-tab-title'>@gameData.name</h2>
+      <h2 id='start-tab-title'>@if (gameData.isPathfinder) {
+        <img src='/images/pathfinder.jpg' alt='Pathfinder'/>
+      } else if (gameData.isDnd35) {
+        <img src='/images/pathfinder.jpg' alt='Dungeons &amp; Dragons 3.5'/>
+      } else {
+        @gameData.name
+      }
+      </h2>
       
       <div id='start-options'>
         <a id='start-single'>
@@ -171,6 +178,9 @@
           <p><label for="include-party-funds"><input type="checkbox" name="include-party-funds" id="include-party-funds" /> Party funds</label></p>
           <p><label for="include-animal-companion"><input type="checkbox" name="include-animal-companion" id="include-animal-companion" /> Animal companion</label></p>
           <p class='info'>Wizards, Rangers, Witches etc get the animal companion automatically</p>
+          @if(gameData.isPathfinder) {
+            <p><label for="include-intelligent-item"><input type="checkbox" name="include-intelligent-item" id="include-intelligent-item" /> Intelligent Item</label></p>
+          }
 
           <p><label for="include-mini"><input type="checkbox" name="include-mini" id="include-mini" /> Map figure sheet</label></p>
           <p class='info'>Includes stand-up map figure, square map token and stats card for initiative tracking.</p>
