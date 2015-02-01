@@ -33,14 +33,7 @@
     
 
     <section class='tab selected' id='start-tab'>
-      <h2 id='start-tab-title'>@if (gameData.isPathfinder) {
-        <img src='/images/pathfinder.jpg' alt='Pathfinder'/>
-      } else if (gameData.isDnd35) {
-        <img src='/images/pathfinder.jpg' alt='Dungeons &amp; Dragons 3.5'/>
-      } else {
-        @gameData.name
-      }
-      </h2>
+      <h2 id='start-tab-title'>@gameData.name</h2>
       
       <div id='start-options'>
         <a id='start-single'>
