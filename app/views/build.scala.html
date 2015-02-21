@@ -10,10 +10,10 @@
 @import controllers.Application.useLanguages
 @import scala.math.round
 
-@main(if (isAprilFool) "Pimp My Character!" else "Build My Character: "+gameData.name) {
+@main((if (isAprilFool) "Pimp My Character: " else "Build My Character: ")+gameData.name) {
   <form action='/pdf/@gameData.game' method='post' id='build-my-character' enctype='multipart/form-data'>
     <header id='bodyheader'>
-      <h1>Character Sheets by Dyslexic Studeos</h1>
+      <h1>@{(if (isAprilFool) "Pimp My Character: " else "Build My Character: ")+gameData.name}</h1>
 
       <nav class='tabs'>
         <ul>
@@ -37,13 +37,13 @@
       
       <div id='start-options'>
         <a id='start-single'>
-          <img src='@routes.Assets.at("/public/images", "single.png")'/>
+          <img src='@routes.Assets.at("/public/images", if (isAprilFool) "april-fool/single.png" else "single.png")'/>
           One character
         </a><a id='start-party'>
-          <img src='@routes.Assets.at("/public/images", "party.png")'/>
+          <img src='@routes.Assets.at("/public/images", if (isAprilFool) "april-fool/party.png" else "party.png")'/>
           A Whole party
         </a><a id='start-gm'>
-          <img src='@routes.Assets.at("/public/images", "gm.png")'/>
+          <img src='@routes.Assets.at("/public/images", if (isAprilFool) "april-fool/gm.png" else "gm.png")'/>
           @(if(gameData.isDnd) "Dungeon Master" else "Game Master")
         </a>
       </div>
@@ -172,7 +172,7 @@
           <p><label for="include-animal-companion"><input type="checkbox" name="include-animal-companion" id="include-animal-companion" /> Animal companion</label></p>
           <p class='info'>Wizards, Rangers, Witches etc get the animal companion automatically</p>
           @if(gameData.isPathfinder) {
-            <p><label for="include-intelligent-item"><input type="checkbox" name="include-intelligent-item" id="include-intelligent-item" /> Intelligent Item</label></p>
+            <p><label for="include-intelligent-item"><input type="checkbox" name="include-intelligent-item" id="include-intelligent-item" /> Intelligent item</label></p>
           }
 
           <p><label for="include-mini"><input type="checkbox" name="include-mini" id="include-mini" /> Map figure sheet</label></p>

@@ -46,6 +46,7 @@ object Composer extends Controller {
 
     data.get("start-type") match {
       case Some("single") =>
+        println("Single...")
         val character = CharacterData.parse(data, gameData, iconic)
         if (character.hasCustomIconic) println("Custom iconic found")
 
@@ -66,6 +67,7 @@ object Composer extends Controller {
         )
 
       case Some("gm") =>
+        println("Gm...")
         val gm = if(gameData.isDnd35) "Dungeon Master" else "Game Master"
         val gmPageSet = data.get("gm-start-type").getOrElse("")
         val name = gmPageSet match {
@@ -90,13 +92,19 @@ object Composer extends Controller {
         }
 
       case Some("all") =>
+        println("Party...")
         val character = CharacterData.parse(data, gameData, iconic)
         val pdf = composeAll(character, gameData, sourceFolders)
         Ok(pdf).as("application/pdf").withHeaders(
           "Content-disposition" -> ("attachment; filename=\""+gameData.name+".pdf\"")
         )
 
-      case _ => NotFound
+      case Some(x) => 
+        println(x+"?")
+        NotFound
+
+      case None =>
+        NotFound
     }
   }
 
@@ -255,10 +263,9 @@ object Composer extends Controller {
     defaultGstate
   }
 
-  def addCharacterPages(character: CharacterData, gameData: GameData, folders: List[File], document: Document, writer: PdfWriter) {
-    val iconic = if (isAprilFool) Some(IconicImage(IconicSet("1-paizo/3-advanced-races", "1 Paizo/3 Advanced Races"), "goblin-d20.png", "Goblin - d20"))
-    else character.iconic
+  val aprilFoolIconic = IconicImage(IconicSet("1-paizo/4-advanced-races", "1 Paizo/4 Advanced Races"), "goblin-d20", "Goblin - d20")
 
+  def addCharacterPages(character: CharacterData, gameData: GameData, folders: List[File], document: Document, writer: PdfWriter) {
     val pages = new CharacterInterpretation(gameData, character).pages
 
     val colour = character.colour
@@ -289,7 +296,7 @@ object Composer extends Controller {
       writeCopyright(canvas, writer, gameData)
 
       //  generic image
-      if (!iconic.isDefined && !character.hasCustomIconic)
+      if (!character.hasCustomIconic && !isAprilFool)
         writeIconic(canvas, writer, page.slot, "public/images/iconics/generic.png", character)
 
       // skills
@@ -308,6 +315,7 @@ object Composer extends Controller {
         page.slot match {
           case "core" => overlayPage(canvas, writer, folders, "Extra/Special Overlays/Character Info.pdf")
           case "inventory" => overlayPage(canvas, writer, folders, "Extra/Special Overlays/Inventory.pdf")
+          case _ => 
         }
       }
 
@@ -337,8 +345,10 @@ object Composer extends Controller {
       //  iconics
       if (character.hasCustomIconic)
         writeIconic(canvas, writer, page.slot, character.customIconic.get.getAbsolutePath, character)
-      else if (iconic.isDefined)
-        writeIconic(canvas, writer, page.slot, iconic.get.largeFile, character)
+      else if (character.iconic.isDefined)
+        writeIconic(canvas, writer, page.slot, character.iconic.get.largeFile, character)
+      else if (isAprilFool)
+        writeIconic(canvas, writer, page.slot, aprilFoolIconic.largeFile, character)
 
       //  watermark
       if (character.watermark != "") {

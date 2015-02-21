@@ -119,10 +119,6 @@ $(function() {
       $("nav.tabs a").removeClass('selected');
       $(this).addClass('selected');
 
-      // april fool
-      if ($("body").is(".april-fool") && cornify_add && Math.random() > 0.8) {
-        cornify_add();
-      }
       return false;
     }
     return true;
@@ -306,6 +302,7 @@ $(function() {
   });
 });
 
+/*
     window._idl = {};
     _idl.variant = "banner";
     (function() {
@@ -315,3 +312,4 @@ $(function() {
         idl.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'members.internetdefenseleague.org/include/?url=' + (_idl.url || '') + '&campaign=' + (_idl.campaign || '') + '&variant=' + (_idl.variant || 'banner');
         document.getElementsByTagName('body')[0].appendChild(idl);
     })();
+*/

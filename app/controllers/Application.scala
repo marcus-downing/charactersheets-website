@@ -11,10 +11,12 @@ import models._
 
 object Application extends Controller {
   
+  val isFakeAprilFool = true
+
   def isAprilFool = {
-    val today = new DateTime().toLocalDate
+    lazy val today = new DateTime().toLocalDate
     //println("Today is "+today.getDayOfMonth+" of "+today.getMonthOfYear)
-    today.getDayOfMonth == 1 && today.getMonthOfYear == 4
+    isFakeAprilFool || (today.getDayOfMonth == 1 && today.getMonthOfYear == 4)
     //true
   }
 
@@ -97,7 +99,7 @@ object Application extends Controller {
       //  say thank you
       Ok(views.html.messageThanks(message, author))
     } catch {
-      case x => 
+      case x: Exception => 
         x.printStackTrace()
         Ok(views.html.messageError(message, author))
     }
