@@ -11,7 +11,7 @@ import models._
 
 object Application extends Controller {
   
-  val isFakeAprilFool = true
+  val isFakeAprilFool = false
 
   def isAprilFool = {
     lazy val today = new DateTime().toLocalDate
