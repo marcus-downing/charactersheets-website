@@ -50,7 +50,7 @@ object Composer extends Controller {
         val character = CharacterData.parse(data, gameData, iconic)
         if (character.hasCustomIconic) println("Custom iconic found")
 
-        val pdf = composePDF(character, gameData, sourceFolders)
+        val pdf = composePDF(character, gameData, sourceFolders, language)
         val filename = character.classes.toList.map(_.name).mkString(", ")+".pdf"
 
         Ok(pdf).as("application/pdf").withHeaders(
@@ -59,7 +59,7 @@ object Composer extends Controller {
 
       case Some("party") =>
         val characters = CharacterData.parseParty(data, gameData)
-        val pdf = composeParty(characters, gameData, sourceFolders)
+        val pdf = composeParty(characters, gameData, sourceFolders, language)
         val filename = characters.map(_.classes.toList.map(_.name).mkString("-")).mkString(", ")+".pdf"
 
         Ok(pdf).as("application/pdf").withHeaders(
@@ -85,7 +85,7 @@ object Composer extends Controller {
           println("Showing "+gm+" - "+name)
 
           val gmdata = CharacterData.parseGM(data, gameData)
-          val pdf = composeGM(gmdata, gameData, gmPageSet, sourceFolders)
+          val pdf = composeGM(gmdata, gameData, gmPageSet, sourceFolders, language)
           Ok(pdf).as("application/pdf").withHeaders(
             "Content-disposition" -> ("attachment; filename=\""+gm+" - "+name+".pdf\"")
           )
@@ -94,7 +94,7 @@ object Composer extends Controller {
       case Some("all") =>
         println("Party...")
         val character = CharacterData.parse(data, gameData, iconic)
-        val pdf = composeAll(character, gameData, sourceFolders)
+        val pdf = composeAll(character, gameData, sourceFolders, language)
         Ok(pdf).as("application/pdf").withHeaders(
           "Content-disposition" -> ("attachment; filename=\""+gameData.name+".pdf\"")
         )
@@ -108,7 +108,7 @@ object Composer extends Controller {
     }
   }
 
-  def composeGM(gmdata: GMData, gameData: GameData, gmPageSet: String, folders: List[File]): Array[Byte] = {
+  def composeGM(gmdata: GMData, gameData: GameData, gmPageSet: String, folders: List[File], language: String): Array[Byte] = {
     val out = new ByteArrayOutputStream()
     val document = new Document
     val writer = PdfWriter.getInstance(document, out)
@@ -145,7 +145,7 @@ object Composer extends Controller {
         writeCopyright(canvas, writer, gameData)
 
         if (page.slot == "party" || page.slot == "npc-party")
-          writeSkills(canvas, writer, page, gameData, None)
+          writeSkills(canvas, writer, page, gameData, None, language)
 
         writeColourOverlay(canvas, gmdata.colour, pageSize)
         canvas.endLayer()
@@ -219,7 +219,7 @@ object Composer extends Controller {
     out.toByteArray
   }
 
-  def composeParty(characters: List[CharacterData], gameData: GameData, folders: List[File]): Array[Byte] = {
+  def composeParty(characters: List[CharacterData], gameData: GameData, folders: List[File], language: String): Array[Byte] = {
     val out = new ByteArrayOutputStream()
     val document = new Document
     val writer = PdfWriter.getInstance(document, out)
@@ -228,21 +228,21 @@ object Composer extends Controller {
 
     for (character <- characters) {
       println("START OF CHARACTER")
-      addCharacterPages(character, gameData, folders, document, writer)
+      addCharacterPages(character, gameData, folders, document, writer, language)
     }
 
     document.close
     out.toByteArray
   }
 
-  def composePDF(character: CharacterData, gameData: GameData, folders: List[File]): Array[Byte] = {
+  def composePDF(character: CharacterData, gameData: GameData, folders: List[File], language: String): Array[Byte] = {
     val out = new ByteArrayOutputStream()
     val document = new Document
     val writer = PdfWriter.getInstance(document, out)
     writer.setRgbTransparencyBlending(true)
     document.open
 
-    addCharacterPages(character, gameData, folders, document, writer)
+    addCharacterPages(character, gameData, folders, document, writer, language)
 
     document.close
     out.toByteArray
@@ -265,7 +265,7 @@ object Composer extends Controller {
 
   val aprilFoolIconic = IconicImage(IconicSet("1-paizo/4-advanced-races", "1 Paizo/4 Advanced Races"), "goblin-d20", "Goblin - d20")
 
-  def addCharacterPages(character: CharacterData, gameData: GameData, folders: List[File], document: Document, writer: PdfWriter) {
+  def addCharacterPages(character: CharacterData, gameData: GameData, folders: List[File], document: Document, writer: PdfWriter, language: String) {
     val pages = new CharacterInterpretation(gameData, character).pages
 
     val colour = character.colour
@@ -296,12 +296,12 @@ object Composer extends Controller {
       writeCopyright(canvas, writer, gameData)
 
       //  generic image
-      if (!character.hasCustomIconic && !isAprilFool)
-        writeIconic(canvas, writer, page.slot, "public/images/iconics/generic.png", character)
+      if (!character.hasCustomIconic && !character.iconic.isDefined && !isAprilFool)
+        writeIconic(canvas, writer, page.slot, "public/images/iconics/generic.png", None, character)
 
       // skills
       if (page.slot == "core")
-        writeSkills(canvas, writer, page, gameData, Some(character))
+        writeSkills(canvas, writer, page, gameData, Some(character), language)
 
       // variant rules
       if (!character.variantRules.isEmpty) {
@@ -344,11 +344,11 @@ object Composer extends Controller {
 
       //  iconics
       if (character.hasCustomIconic)
-        writeIconic(canvas, writer, page.slot, character.customIconic.get.getAbsolutePath, character)
+        writeIconic(canvas, writer, page.slot, character.customIconic.get.getAbsolutePath, None, character)
       else if (character.iconic.isDefined)
-        writeIconic(canvas, writer, page.slot, character.iconic.get.largeFile, character)
+        writeIconic(canvas, writer, page.slot, character.iconic.get.largeFile, character.iconic, character)
       else if (isAprilFool)
-        writeIconic(canvas, writer, page.slot, aprilFoolIconic.largeFile, character)
+        writeIconic(canvas, writer, page.slot, aprilFoolIconic.largeFile, None, character)
 
       //  watermark
       if (character.watermark != "") {
@@ -383,17 +383,15 @@ object Composer extends Controller {
     canvas.beginText
     val copyrightLayer = new PdfLayer("Iconic image", writer)
     canvas.beginLayer(copyrightLayer)
-    canvas.setFontAndSize(font, 5)
+    canvas.setFontAndSize(font, 5.5f)
     canvas.showTextAligned(Element.ALIGN_LEFT, "\u00A9 Marcus Downing "+year+"        http://charactersheets.minotaur.cc", 30, 22, 0)
+    canvas.setFontAndSize(font, 4.5f)
+
     if (gameData.isPathfinder) {
-      canvas.setFontAndSize(font, 4)
-
-      canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet uses trademarks and/or copyrights owned by Paizo Publishing, LLC, which are used under Paizo's Community Use Policy. We are expressly prohibited from charging you to use or", 206, 22, 0)
-      canvas.showTextAligned(Element.ALIGN_LEFT, "access this content. This character sheet is not published, endorsed, or specifically approved by Paizo Publishing. For more information about Paizo's Community Use Policy, please visit paizo.com/communityuse. For more information about Paizo Publishing and Paizo products, please visit paizo.com.", 30, 17, 0)
+      canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet uses trademarks and/or copyrights owned by Paizo Publishing, LLC, which are used under Paizo's Community Use Policy. We are expressly prohibited from charging you to use or access this content.", 180, 22, 0)
+      canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet is not published, endorsed, or specifically approved by Paizo Publishing. For more information about Paizo's Community Use Policy, please visit paizo.com/communityuse. For more information about Paizo Publishing and Paizo products, please visit paizo.com.", 30, 17, 0)
     } else if (gameData.isDnd35) {
-      canvas.setFontAndSize(font, 4)
-
-      canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC. This character sheet may use the trademarks and other intellectual property of", 206, 22, 0)
+      canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC. This character sheet may use the trademarks and other intellectual property of", 180, 22, 0)
       canvas.showTextAligned(Element.ALIGN_LEFT, "Wizards of the Coast LLC, which is permitted under Wizards' Fan Site Policy. For example, DUNGEONS & DRAGONS®, D&D®, PLAYER'S HANDBOOK 2®, and DUNGEON MASTER'S GUIDE® are trademark[s] of Wizards of the Coast and D&D® core rules, game mechanics, characters and their", 30, 17, 0)
       canvas.showTextAligned(Element.ALIGN_LEFT, "distinctive likenesses are the property of the Wizards of the Coast. For more information about Wizards of the Coast or any of Wizards' trademarks or other intellectual property, please visit their website.", 30, 12, 0)
     }
@@ -402,7 +400,7 @@ object Composer extends Controller {
   }
 
   //  1mm = 2.8pt
-  def writeSkills(canvas: PdfContentByte, writer: PdfWriter, page: Page,  gameData: GameData, character: Option[CharacterData]) {
+  def writeSkills(canvas: PdfContentByte, writer: PdfWriter, page: Page,  gameData: GameData, character: Option[CharacterData], language: String) {
     val coreSkills = gameData.coreSkills
     val classSkills: List[String] = character.map(_.classes.flatMap(_.skills).distinct).getOrElse(Nil)
     val knowledgeSkills = if (character.map(_.allKnowledge).getOrElse(false)) gameData.knowledgeSkills else Nil
@@ -415,11 +413,19 @@ object Composer extends Controller {
     val skills = (gameData.coreSkills ::: classSkills ::: knowledgeSkills ::: bonusSkills).distinct.flatMap { name =>
       gameData.getSkill(name)
     }
-    println("Writing skills: "+skills.map(_.name))
-    val (afterFold, beforeFold) = skills.filter(!_.isSubSkill).partition(_.afterFold)
+
+    // translate skill names before sorting them
+    val translate = TranslationData(language)
+    val displaySkills: List[Skill] = skills.map { s => 
+      val name = s.displayName.getOrElse(s.name)
+      s.copy(displayName = Some(translate(name).getOrElse(name)))
+    }
+
+    println("Writing skills: "+displaySkills.map(_.name))
+    val (afterFold, beforeFold) = displaySkills.filter(!_.isSubSkill).partition(_.afterFold)
     val skillsToWrite = beforeFold.sortBy(_.skillName) ::: afterFold.sortBy(_.skillName)
 
-    val subskillsBySkill: Map[String, List[Skill]] = skills.filter(_.isSubSkill).groupBy(_.subSkillOf.getOrElse(""))
+    val subskillsBySkill: Map[String, List[Skill]] = displaySkills.filter(_.isSubSkill).groupBy(_.subSkillOf.getOrElse(""))
 
     //  set values up
     val skillFont = textFont
@@ -464,8 +470,7 @@ object Composer extends Controller {
       canvas.setFontAndSize(skillFont, skillFontSize)
       canvas.setColorFill(stdColour)
       canvas.setGState(defaultGstate)
-      val displayName = skill.skillName
-      canvas.showTextAligned(Element.ALIGN_LEFT, displayName, nameLeft, y, 0)
+      canvas.showTextAligned(Element.ALIGN_LEFT, skill.skillName, nameLeft, y, 0)
 
       if (isSubSkill) {
         val top = firstLine + (pos - 1) * lineIncrement + lineBottomOffset
@@ -784,7 +789,7 @@ object Composer extends Controller {
         rageMiddle, favouredEnemyMiddle)
   }
 
-  def writeIconic(canvas: PdfContentByte, writer: PdfWriter, slot: String, imgFilename: String, character: CharacterData) {
+  def writeIconic(canvas: PdfContentByte, writer: PdfWriter, slot: String, imgFilename: String, iconic: Option[IconicImage], character: CharacterData) {
     if (imgFilename != "") {
       println("Iconic image file: "+imgFilename)
       slot match {
@@ -803,8 +808,11 @@ object Composer extends Controller {
               case "background" => img.setAbsolutePosition(127f - (img.getScaledWidth() / 2), 425f)
               case _ =>
             }
-            // img.setAbsolutePosition(315f - (img.getScaledWidth() / 2), 410f)
             canvas.addImage(img)
+
+            for (i <- iconic; cp <- i.copyright) {
+              println("Copyright notice on iconic: "+cp.copyright)
+            }
           } catch {
             case e: Exception => e.printStackTrace
           }
@@ -1005,7 +1013,7 @@ object Composer extends Controller {
   }
 
 
-  def composeAll(character: CharacterData, gameData: GameData, folders: List[File]): Array[Byte] = {
+  def composeAll(character: CharacterData, gameData: GameData, folders: List[File], language: String): Array[Byte] = {
     val out = new ByteArrayOutputStream()
     val document = new Document
     val writer = PdfWriter.getInstance(document, out)
@@ -1041,7 +1049,7 @@ object Composer extends Controller {
       writeCopyright(canvas, writer, gameData)
 
       //  generic image
-      writeIconic(canvas, writer, page.slot, "public/images/iconics/generic.png", character)
+      writeIconic(canvas, writer, page.slot, "public/images/iconics/generic.png", None, character)
 
       writeColourOverlay(canvas, colour, pageSize)
 
@@ -1116,7 +1124,7 @@ class CharacterInterpretation(gameData: GameData, character: CharacterData) {
     if (character.includePartyFunds)
       pages = pages ::: List(PageSlot("partyfunds", None))
     if (character.includeAnimalCompanion)
-      pages = pages ::: List(PageSlot("animalcompanion", None))
+      pages = pages ::: List(PageSlot("animalcompanion", None), PageSlot("mini-animal", Some(character.miniAnimalSize)))
     if (character.includeMini)
       pages = pages ::: List(PageSlot("mini", Some(character.miniSize)))
 

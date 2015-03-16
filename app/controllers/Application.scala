@@ -14,13 +14,9 @@ object Application extends Controller {
   val isFakeAprilFool = false
 
   def isAprilFool = {
-    lazy val today = new DateTime().toLocalDate
-    //println("Today is "+today.getDayOfMonth+" of "+today.getMonthOfYear)
+    val today = new DateTime().toLocalDate
     isFakeAprilFool || (today.getDayOfMonth == 1 && today.getMonthOfYear == 4)
-    //true
   }
-
-  def useLanguages = true
 
   // index
   def index = Action { Ok(views.html.index()) }

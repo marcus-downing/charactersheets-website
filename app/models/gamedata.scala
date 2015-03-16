@@ -9,7 +9,7 @@ import play.api.libs.json._
 object GameData {
   def load(game: String): GameData = {
     val file = new File("public/data/"+game+".json")
-    val data = Source.fromFile(file).getLines().mkString
+    val data = Source.fromFile(file)("UTF-8").getLines().mkString
     val json = Json.parse(data)
     parse(json)
   }

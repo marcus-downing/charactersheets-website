@@ -1,6 +1,7 @@
 package models
 
 import java.io.File
+import scala.io.Source
 
 object CharacterData {
 
@@ -64,6 +65,7 @@ object CharacterData {
       includeAnimalCompanion = positive.contains("include-animal-companion"),
       includeMini = positive.contains("include-mini"),
       miniSize = data.get("mini-size").getOrElse("medium"),
+      miniAnimalSize = data.get("mini-animal-size").getOrElse("medium"),
 
       watermark = if (positive.contains("has-watermark")) data.get("watermark").getOrElse("") else "",
 
@@ -138,6 +140,7 @@ case class CharacterData (
   includeAnimalCompanion: Boolean,
   includeMini: Boolean,
   miniSize: String,
+  miniAnimalSize: String,
 
   watermark: String,
 
@@ -168,7 +171,32 @@ case class IconicImage(set: IconicSet, fileName: String, niceName: String) {
   val largeFile = if (fileName == "") "" else "public/images/iconics/large/"+set.filePath+"/"+fileName+".png"
   val smallFile = if (fileName == "") "" else"public/images/iconics/small/"+set.filePath+"/"+fileName+".png"
   val url = if (fileName == "") "" else ("/images/iconics/small/"+set.filePath+"/"+fileName+".png").replaceAll(" ", "+")
+
+  def copyright: Option[IconicCopyright] = {
+    def cr(folder: File): Option[IconicCopyright] = {
+      if (folder == null || !folder.exists() || folder.getName() == "iconics")
+        None
+      else {
+        val copyrightFile = new File(folder.getPath+"/copyright.txt")
+        if (copyrightFile.exists()) {
+          println("Found copyright file: "+copyrightFile.getPath())
+          val cplines = Source.fromFile(copyrightFile).getLines().toList.map(_.trim).filter(_ != "")
+          cplines match {
+            case cp :: link :: license :: _ => Some(IconicCopyright(cp, Some(link), Some(license)))
+            case cp :: link :: _ => Some(IconicCopyright(cp, Some(link), None))
+            case cp :: _ => Some(IconicCopyright(cp, None, None))
+            case _ => None
+          }
+        } else cr(folder.getParentFile())
+      }
+    }
+
+    val file = new File(largeFile)
+    cr(file.getParentFile())
+  }
 }
+
+case class IconicCopyright (copyright: String, url: Option[String], license: Option[String])
 
 object IconicImage {
   lazy val iconics: List[IconicImage] = {

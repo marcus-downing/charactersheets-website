@@ -153,6 +153,9 @@
         { "file": "Extra/Mini (Small).pdf", "slot": "mini", "variant": "small", "name": "Mini (Small)" },
         { "file": "Extra/Mini (Medium).pdf", "slot": "mini", "variant": "medium", "name": "Mini (Medium)" },
         { "file": "Extra/Mini (Large).pdf", "slot": "mini", "variant": "large", "name": "Mini (Large)" },
+        { "file": "Extra/Mini (Small).pdf", "slot": "mini-animal", "variant": "small", "name": "Animal Companion Mini (Small)" },
+        { "file": "Extra/Mini (Medium).pdf", "slot": "mini-animal", "variant": "medium", "name": "Animal Companion Mini (Medium)" },
+        { "file": "Extra/Mini (Large).pdf", "slot": "mini-animal", "variant": "large", "name": "Animal Companion Mini (Large)" },
 
         { "file": "Core/Animal Companion.pdf", "slot": "animalcompanion", "name": "Animal Companion" },
         { "file": "Psionics/Psicrystal.pdf", "slot": "psicrystal", "name": "Psicrystal" }

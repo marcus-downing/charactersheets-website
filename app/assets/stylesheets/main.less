@@ -415,9 +415,15 @@ form#build-my-character {
     box-shadow: inset 0px 2px 3px #676;
     overflow: auto; text-align: center;
 
-    &#iconic {
-      float: right; margin-bottom: 10px;
-      min-width: 300px; max-width: 550px; min-height: 405px;
+    &#iconic, &#animal {
+      margin-bottom: 10px;
+      width: 330px;
+      min-height: 405px;
+    }
+    &#animal {
+      margin-bottom: 10px;
+      width: 330px;
+      min-height: 50px;
     }
     &#logo, &#gm-logo {
       width: 400px;
@@ -425,9 +431,14 @@ form#build-my-character {
       img { max-width: 300px; }
     }
 
-    &#iconic, &#logo, &#gm-logo {
+    &#iconic, &#animal, &#logo, &#gm-logo {
       img { display: none; &.selected { display: block; margin-left: auto; margin-right: auto; } }
     }
+  }
+
+  #iconics-column {
+    float: right;
+    width: 358px;
   }
 
   #watermark {

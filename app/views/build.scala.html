@@ -4,12 +4,9 @@
   iconicSets: List[models.IconicSet],
   logos: List[models.Logo]
 )
-
 @import IconicImage.slug
 @import controllers.Application.isAprilFool
-@import controllers.Application.useLanguages
 @import scala.math.round
-
 @main((if (isAprilFool) "Pimp My Character: " else "Build My Character: ")+gameData.name) {
   <form action='/pdf/@gameData.game' method='post' id='build-my-character' enctype='multipart/form-data'>
     <header id='bodyheader'>
@@ -121,14 +118,27 @@
     </section>
 
     <section class='tab' id='options-tab'>
-      <div class='well' id='iconic'>
-        <input type='hidden' name='inventory-iconic' id='inventory-iconic' value='default'/>
-        <img src='/images/iconics/generic.png' id='iconic-generic' class='selected' />
-        <img src='/images/iconics/custom.png' id='iconic-custom' />
-        @for(iconic <- iconics) {
-          <img data-src='@iconic.url' id='iconic-@iconic.id'/>
-        }
-        <p><a class='button' href='javascript:void(0);' id='select-iconic-button'>Select portrait</a></p>
+      <div id='iconics-column'>
+        <div class='well' id='iconic'>
+          <input type='hidden' name='inventory-iconic' id='inventory-iconic' value='default'/>
+          <img src='/images/iconics/generic.png' id='iconic-generic' class='selected' />
+          <img src='/images/iconics/custom.png' id='iconic-custom' />
+          @for(iconic <- iconics) {
+            <img data-src='@iconic.url' id='iconic-@iconic.id'/>
+          }
+          <p><a class='button' href='javascript:void(0);' id='select-iconic-button'>Select portrait</a></p>
+        </div>
+
+        @**
+        <div class='well' id='animal'>
+          <input type='hidden' name='animal-iconic' id='animal-iconic' value='none'/>
+          <!--<img src='/images/iconics/custom.png' id='iconic-custom' />-->
+          @for(iconic <- iconics) {
+            <img data-src='@iconic.url' id='animal-iconic-@iconic.id'/>
+          }
+          <p><a class='button' href='javascript:void(0);' id='select-animal-iconic-button'>Select animal picture</a></p>
+        </div>
+        **@
       </div>
 
       <h2 id="options-tab-title">Options</h2>
@@ -182,6 +192,13 @@
             <label for="mini-medium"><input type="radio" name="mini-size" value="medium" id="mini-medium" checked> Medium</label>&nbsp; 
             <label for="mini-large"><input type="radio" name="mini-size" value="large" id="mini-large"> Large</label>
           </p>
+          @**
+          <p class='indent'>Animal companion: 
+            <label for="mini-animal-small"><input type="radio" name="mini-animal-size" value="small" id="mini-animal-small"> Small</label>&nbsp; 
+            <label for="mini-animal-medium"><input type="radio" name="mini-animal-size" value="medium" id="mini-animal-medium" checked> Medium</label>&nbsp; 
+            <label for="mini-animal-large"><input type="radio" name="mini-animal-size" value="large" id="mini-animal-large"> Large</label>
+          </p>
+          **@
 
         @**
         @if(gameData.isPathfinder) {
@@ -390,7 +407,6 @@
       <!-- 
         translations
       -->
-      @if(useLanguages) {
         <h2>Language</h2>
         <fieldset>
           <table id='language-box'>
@@ -413,7 +429,6 @@
             }
           </table>
         </fieldset>
-      }
 
 
       <h2>Download</h2>
