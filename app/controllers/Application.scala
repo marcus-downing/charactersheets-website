@@ -56,9 +56,9 @@ object Application extends Controller {
   lazy val dnd35Data: GameData = GameData.load("dnd35")
   lazy val testData: GameData = GameData.load("test")
 
-  def buildPathfinder = Action { Ok(views.html.build(pathfinderData, iconics, iconicSets, logos)) }
-  def buildDnd35 = Action { Ok(views.html.build(dnd35Data, iconics, iconicSets, logos)) }
-  def buildTest = Action { Ok(views.html.build(testData, iconics, iconicSets, logos)) }
+  def buildPathfinder = Action { Ok(views.html.build(pathfinderData, iconics, iconicSets, logos, logoSets)) }
+  def buildDnd35 = Action { Ok(views.html.build(dnd35Data, iconics, iconicSets, logos, logoSets)) }
+  def buildTest = Action { Ok(views.html.build(testData, iconics, iconicSets, logos, logoSets)) }
 
   //  messages
 
@@ -106,5 +106,6 @@ object Application extends Controller {
 
   def getIconic(path: String): Option[IconicImage] = IconicImage.get(path)
 
-  def logos = Logo.logos
+  def logos: List[Logo] = Logo.logos
+  def logoSets: List[LogoSet] = Logo.sets
 }

@@ -10,7 +10,7 @@ object CharacterData {
     keys.filter(key => data.get(key) == Some("on"))
   }
 
-  def parse(data: Map[String, String], gameData: GameData, customIconic: Option[File]): CharacterData = {
+  def parse(data: Map[String, String], gameData: GameData, customIconic: Option[File], customLogo: Option[File]): CharacterData = {
     //val data2 = data.flatMap { case (key, list) => key -> list.headOption }
     //println("Data 2 "+data2)
     val positive = positiveData(data)
@@ -42,6 +42,7 @@ object CharacterData {
 
     println("Given iconic: "+data.get("inventory-iconic").getOrElse("(none)"))
     if (customIconic.isDefined) println("Custom iconic uploaded")
+    if (customLogo.isDefined) println("Custom logo uploaded")
 
     // data
     CharacterData(
@@ -52,6 +53,7 @@ object CharacterData {
       inventoryIconic = inventoryIconic,
       customIconic = if (inventoryIconic == "custom") customIconic else None,
       logo = Logo.get(data.get("logo").getOrElse(gameData.game)),
+      customLogo = if (data.get("logo") == "custom") customLogo else None,
 
       includeGM = positive.contains("gm"),
       partyDownload = positive.contains("party-download"),
@@ -73,15 +75,15 @@ object CharacterData {
       )
   }
 
-  def parseParty(data: Map[String, String], gameData: GameData): List[CharacterData] = {
+  def parseParty(data: Map[String, String], gameData: GameData, customLogo: Option[File]): List[CharacterData] = {
     val charids = data.get("charids").getOrElse("").split(",").map(_.trim).filter(_ != "").toList
     println("Stashed character IDs: "+charids.mkString(", "))
     val stashedCharacters = charids.map { charid =>
       val prefix = "char-"+charid+"-"
       val subdata: Map[String, String] = data.filterKeys(_.startsWith(prefix)).map { case (key, value) => key.substring(prefix.length) -> value } toMap;
-      parse(subdata, gameData, None)
+      parse(subdata, gameData, None, None)
     }
-    val finalCharacter = parse(data, gameData, None)
+    val finalCharacter = parse(data, gameData, None, customLogo)
     stashedCharacters ::: (finalCharacter :: Nil)
   }
 
@@ -127,6 +129,7 @@ case class CharacterData (
   inventoryIconic: String,
   customIconic: Option[File],
   logo: Option[Logo],
+  customLogo: Option[File],
 
   includeGM: Boolean,
   partyDownload: Boolean,
@@ -147,146 +150,6 @@ case class CharacterData (
   variantRules: List[String]
 ) {
   def hasCustomIconic = customIconic.isDefined
+  def hasCustomLogo = customLogo.isDefined
   def iconic: Option[IconicImage] = IconicImage.get(inventoryIconic)
-}
-
-
-//  Iconics
-
-case class IconicSet(filePath: String, nicePath: String) {
-  val sortableName = filePath
-  val (groupName, setName) = IconicImage.splitPath(nicePath)
-  val id = IconicImage.slug(filePath)
-  val groupDisplayName = IconicImage.withoutNumber(groupName)
-  val setDisplayName = IconicImage.withoutNumber(setName)
-
-  lazy val iconics: List[IconicImage] = IconicImage.iconics.filter(_.set == this).sortBy(_.sortableName)
-}
-
-case class IconicImage(set: IconicSet, fileName: String, niceName: String) {
-  import IconicImage.slug
-  val path = set.filePath+"/"+fileName
-  val id = set.id+"-"+slug(fileName)
-  val sortableName = id
-  val largeFile = if (fileName == "") "" else "public/images/iconics/large/"+set.filePath+"/"+fileName+".png"
-  val smallFile = if (fileName == "") "" else"public/images/iconics/small/"+set.filePath+"/"+fileName+".png"
-  val url = if (fileName == "") "" else ("/images/iconics/small/"+set.filePath+"/"+fileName+".png").replaceAll(" ", "+")
-
-  def copyright: Option[IconicCopyright] = {
-    def cr(folder: File): Option[IconicCopyright] = {
-      if (folder == null || !folder.exists() || folder.getName() == "iconics")
-        None
-      else {
-        val copyrightFile = new File(folder.getPath+"/copyright.txt")
-        if (copyrightFile.exists()) {
-          println("Found copyright file: "+copyrightFile.getPath())
-          val cplines = Source.fromFile(copyrightFile).getLines().toList.map(_.trim).filter(_ != "")
-          cplines match {
-            case cp :: link :: license :: _ => Some(IconicCopyright(cp, Some(link), Some(license)))
-            case cp :: link :: _ => Some(IconicCopyright(cp, Some(link), None))
-            case cp :: _ => Some(IconicCopyright(cp, None, None))
-            case _ => None
-          }
-        } else cr(folder.getParentFile())
-      }
-    }
-
-    val file = new File(largeFile)
-    cr(file.getParentFile())
-  }
-}
-
-case class IconicCopyright (copyright: String, url: Option[String], license: Option[String])
-
-object IconicImage {
-  lazy val iconics: List[IconicImage] = {
-    val iconicsFolder = new File("public/images/iconics")
-    if (!iconicsFolder.isDirectory) Nil
-    else {
-      val iconicsList = new File("public/images/iconics/iconics.txt")
-      val lines = scala.io.Source.fromFile(iconicsList).getLines.toList
-      val iconics = lines.flatMap { line =>
-        try {
-          val filePath :: nicePath :: _ = line.split("=").toList
-          val (fileBase, fileName) = splitPath(filePath)
-          val (niceBase, niceName) = splitPath(nicePath)
-          val set = IconicSet(fileBase, niceBase)
-          println(" - Found iconic: "+set.nicePath+" / "+niceName)
-          Some(IconicImage(set, fileName, niceName))
-        } catch {
-          case _: Exception => None
-        }
-      }
-
-      println("Found "+iconics.length+" iconics")
-
-      iconics.sortBy(_.sortableName)
-    }
-  }
-
-  val emptyIconic = IconicImage(IconicSet("", ""), "", "")
-
-  def get(code: String): Option[IconicImage] = {
-    if (code == "none") Some(emptyIconic)
-    else iconics.filter(_.id == code).headOption
-  }
-
-  lazy val sets: List[IconicSet] = iconics.map(_.set).distinct.sortBy(_.sortableName)
-
-  def withoutNumber(name: String): String = {
-    val rex = """[0-9]+\s+(.*)""" r
-    
-    name match {
-      case rex(rem) => rem
-      case _ => name
-    }
-  }
-
-  def splitPath(path: String): (String, String) = {
-    val reversePath: List[String] = path.split("/").toList.reverse
-    val head = reversePath.head
-    val tail = reversePath.tail.reverse
-    val base = tail.mkString("/")
-    (base, head)
-  }
-
-  def slug(str: String): String = str.toLowerCase.replaceAll("/", "--").replaceAll("[^a-z0-9/]+", "-").replaceAll("(\\.|-)png$", "").replaceAll("^-+", "").replaceAll("-+$", "")
-}
-
-case class Logo(code: String, name: String) {
-  lazy val fileName: Option[String] = {
-    if (new File("public/images/logos/"+code+".png").exists()) Some(code+".png")
-    else if (new File("public/images/logos/"+code+".jpg").exists()) Some(code+".jpg")
-    else None
-  }
-  def url = fileName.map("/images/logos/"+_)
-  def filePath = fileName.map("public/images/logos/"+_)
-  def ifExists: Option[Logo] = fileName.map(f => this)
-}
-
-object Logo {
-  lazy val logos: List[Logo] = {
-    val logosFolder = new File("public/images/logos")
-    if (!logosFolder.isDirectory) Nil
-    else {
-      val logosList = new File("public/images/logos/logos.txt")
-      val lines = scala.io.Source.fromFile(logosList).getLines.toList
-
-      val logos = lines.flatMap { line =>
-        try {
-          val code :: name :: _ = line.split("=").toList
-          println(" - Found logo: "+code+" / "+name)
-          Logo(code, name).ifExists
-        } catch {
-          case _: Exception => None
-        }
-      }
-
-      println("Found "+logos.length+" logos")
-      logos
-    }
-  }
-
-  def get(code: String): Option[Logo] = logos.filter(_.code == code).headOption
-  def get(codes: List[String]): Option[Logo] = codes.flatMap(code => logos.filter(_.code == code)).headOption
 }

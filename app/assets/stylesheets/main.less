@@ -591,7 +591,7 @@ form#build-my-character {
     background: fade(lighten(@bg, 10%), 70%);
   }
 
-  #iconic-set-list {
+  .set-list {
     position: absolute;
     top: @hh+@bb;
     bottom: @bb;
@@ -623,7 +623,7 @@ form#build-my-character {
     background: rgba(255, 255, 255, 0.5) url(/assets/images/white-spot.png) 50% 50% no-repeat; box-shadow: inset 0px 2px 3px #676;
     padding: 5px;
   }
-  .image-select-set {
+  .image-list {
     a {
       display: block;
       float: left;
@@ -642,8 +642,7 @@ form#build-my-character {
         margin-bottom: 6px;
       }
     }
-  }
-  #iconic-image-list {
+
     position: absolute;
     top: @bb;
     bottom: @bb;
@@ -670,6 +669,27 @@ form#build-my-character {
     }
   }
 
+  #iconic-image-list {
+    a {
+
+    }
+    img {
+      max-height: 350px;
+      max-width: 300px;
+    }
+  }
+
+  #logo-list {
+    .image-select-set a {
+      height: 150px !important;
+    }
+    img {
+      max-height: 100px;
+      max-width: 400px;
+    }
+  }
+
+  /*
   #logo-list {
     position: absolute;
     top: @hh+@bb;
@@ -684,7 +704,7 @@ form#build-my-character {
       max-height: 100px;
       max-width: 400px;
     }
-  }
+  }*/
 }
 
 #flattr img {

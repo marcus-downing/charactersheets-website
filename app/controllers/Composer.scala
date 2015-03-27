@@ -23,13 +23,21 @@ object Composer extends Controller {
 
   def downloadAction(gameData: GameData) = Action(parse.multipartFormData) { request =>
     println("\n\nDownloading...")
-    val iconic = request.body.file("iconic-custom-file").map{ filepart =>
+    val customIconic = request.body.file("iconic-custom-file").map{ filepart =>
       for (contentType <- filepart.contentType)
         println("File uploaded with content type: "+contentType)
       println("File named "+filepart.filename)
       println("File at "+filepart.ref.file.getAbsolutePath)
       filepart.ref.file
     }
+    val customLogo = request.body.file("logo-custom-file").map{ filepart =>
+      for (contentType <- filepart.contentType)
+        println("File uploaded with content type: "+contentType)
+      println("File named "+filepart.filename)
+      println("File at "+filepart.ref.file.getAbsolutePath)
+      filepart.ref.file
+    }
+
     val bodydata = request.body.asFormUrlEncoded
     //val data: Map[String, String] = bodydata.flatMap { case (key, list) => key -> list.headOption } toMap
     val data: Map[String, String] = bodydata.mapValues { _.head }
@@ -47,8 +55,9 @@ object Composer extends Controller {
     data.get("start-type") match {
       case Some("single") =>
         println("Single...")
-        val character = CharacterData.parse(data, gameData, iconic)
+        val character = CharacterData.parse(data, gameData, customIconic, customLogo)
         if (character.hasCustomIconic) println("Custom iconic found")
+        if (character.hasCustomLogo) println("Custom logo found")
 
         val pdf = composePDF(character, gameData, sourceFolders, language)
         val filename = character.classes.toList.map(_.name).mkString(", ")+".pdf"
@@ -58,7 +67,7 @@ object Composer extends Controller {
         )
 
       case Some("party") =>
-        val characters = CharacterData.parseParty(data, gameData)
+        val characters = CharacterData.parseParty(data, gameData, customLogo)
         val pdf = composeParty(characters, gameData, sourceFolders, language)
         val filename = characters.map(_.classes.toList.map(_.name).mkString("-")).mkString(", ")+".pdf"
 
@@ -93,7 +102,7 @@ object Composer extends Controller {
 
       case Some("all") =>
         println("Party...")
-        val character = CharacterData.parse(data, gameData, iconic)
+        val character = CharacterData.parse(data, gameData, customIconic, customLogo)
         val pdf = composeAll(character, gameData, sourceFolders, language)
         Ok(pdf).as("application/pdf").withHeaders(
           "Content-disposition" -> ("attachment; filename=\""+gameData.name+".pdf\"")
@@ -150,31 +159,7 @@ object Composer extends Controller {
         writeColourOverlay(canvas, gmdata.colour, pageSize)
         canvas.endLayer()
 
-        if (page.slot == "kingdom" || page.slot == "hex-a4" || page.slot == "hex-a3" || page.slot == "hex-a4-landscape" || page.slot == "iso-a4" || page.slot == "grid-a4") {
-          canvas.setGState(defaultGstate)
-          val imgLayer = new PdfLayer("Logo image", writer)
-          canvas.beginLayer(imgLayer)
-          val imgFile = logoImage(gameData, gmdata.logo)
-          try {
-            println("Adding logo: "+imgFile)
-            val awtImage = java.awt.Toolkit.getDefaultToolkit().createImage(imgFile)
-            val img = Image.getInstance(awtImage, null)
-            if (page.slot == "hex-a4-landscape") {
-              img.scaleToFit(120f, 35f)
-              img.setAbsolutePosition(80f - (img.getScaledWidth() / 2), 570f - (img.getScaledHeight() / 2))
-            } else if (page.slot == "iso-a4" || page.slot == "grid-a4") {
-              img.scaleToFit(120f, 35f)
-              img.setAbsolutePosition(90f - (img.getScaledWidth() / 2), 810f - (img.getScaledHeight() / 2))
-            } else {
-              img.scaleToFit(170f,50f)
-              img.setAbsolutePosition(127f - (img.getScaledWidth() / 2), 800f - (img.getScaledHeight() / 2))
-            }
-            canvas.addImage(img)
-          } catch {
-            case e: Exception => e.printStackTrace
-          }
-          canvas.endLayer()
-        }
+        writeLogo(canvas, writer, page.slot, gameData, None, Some(gmdata))
 
         //  done
         fis.close
@@ -324,23 +309,7 @@ object Composer extends Controller {
       canvas.endLayer()
 
       //  logo
-      if (page.slot == "core" || page.slot == "eidolon") {
-        canvas.setGState(defaultGstate)
-        val imgLayer = new PdfLayer("Logo image", writer)
-        canvas.beginLayer(imgLayer)
-        val imgFile = logoImage(gameData, character)
-        try {
-          println("Adding logo: "+imgFile)
-          val awtImage = java.awt.Toolkit.getDefaultToolkit().createImage(imgFile)
-          val img = Image.getInstance(awtImage, null)
-          img.scaleToFit(170f,50f)
-          img.setAbsolutePosition(127f - (img.getScaledWidth() / 2), 800f - (img.getScaledHeight() / 2))
-          canvas.addImage(img)
-        } catch {
-          case e: Exception => e.printStackTrace
-        }
-        canvas.endLayer()
-      }
+      writeLogo(canvas, writer, page.slot, gameData, Some(character), None)
 
       //  iconics
       if (character.hasCustomIconic)
@@ -798,20 +767,34 @@ object Composer extends Controller {
           canvas.setGState(defaultGstate)
           val imgLayer = new PdfLayer("Iconic image", writer)
           canvas.beginLayer(imgLayer)
+          var copyrightX: Float = 0f
+          var copyrightY: Float = 0f
           try {
             println("Image: "+imgFilename)
             val awtImage = java.awt.Toolkit.getDefaultToolkit().createImage(imgFilename)
             val img = Image.getInstance(awtImage, null)
             img.scaleToFit(190f,220f)
             slot match {
-              case "inventory" => img.setAbsolutePosition(315f - (img.getScaledWidth() / 2), 410f)
-              case "background" => img.setAbsolutePosition(127f - (img.getScaledWidth() / 2), 425f)
+              case "inventory" => 
+                img.setAbsolutePosition(315f - (img.getScaledWidth() / 2), 410f)
+                copyrightX = 234f; copyrightY = 410f
+              case "background" => 
+                img.setAbsolutePosition(127f - (img.getScaledWidth() / 2), 425f)
+                copyrightX = 30f; copyrightY = 420f
               case _ =>
             }
             canvas.addImage(img)
 
             for (i <- iconic; cp <- i.copyright) {
               println("Copyright notice on iconic: "+cp.copyright)
+              if (copyrightX != 0) {
+                val fadedGState = new PdfGState
+                fadedGState.setBlendMode(PdfGState.BM_NORMAL)
+                fadedGState.setFillOpacity(0.8f)
+                canvas.setGState(fadedGState)
+                canvas.setFontAndSize(textFont, 7.5f)
+                canvas.showTextAligned(Element.ALIGN_LEFT, "© "+cp.copyright, copyrightX, copyrightY, 0)
+              }
             }
           } catch {
             case e: Exception => e.printStackTrace
@@ -986,6 +969,62 @@ object Composer extends Controller {
     case _ => new BaseColor(0.3f, 0.3f, 0.3f)
   }
 
+
+  def writeLogo(canvas: PdfContentByte, writer: PdfWriter, slot: String, gameData: GameData, character: Option[CharacterData], gmData: Option[GMData]) {
+    lazy val imgFile = {
+      character match {
+        case Some(char) => logoImage(gameData, char)
+        case None => 
+          gmData match {
+            case Some(gmdata) => logoImage(gameData, gmdata.logo)
+            case None => gameData.defaultLogo
+          }
+      }
+    }
+
+    if (slot == "core" || slot == "eidolon") {
+      canvas.setGState(defaultGstate)
+      val imgLayer = new PdfLayer("Logo image", writer)
+      canvas.beginLayer(imgLayer)
+      try {
+        println("Adding logo: "+imgFile)
+        val awtImage = java.awt.Toolkit.getDefaultToolkit().createImage(imgFile)
+        val img = Image.getInstance(awtImage, null)
+        img.scaleToFit(170f,50f)
+        img.setAbsolutePosition(127f - (img.getScaledWidth() / 2), 800f - (img.getScaledHeight() / 2))
+        canvas.addImage(img)
+      } catch {
+        case e: Exception => e.printStackTrace
+      }
+      canvas.endLayer()
+    }
+
+    if (slot == "kingdom" || slot == "hex-a4" || slot == "hex-a3" || slot == "hex-a4-landscape" || slot == "iso-a4" || slot == "grid-a4") {
+      canvas.setGState(defaultGstate)
+      val imgLayer = new PdfLayer("Logo image", writer)
+      canvas.beginLayer(imgLayer)
+      try {
+        println("Adding logo: "+imgFile)
+        val awtImage = java.awt.Toolkit.getDefaultToolkit().createImage(imgFile)
+        val img = Image.getInstance(awtImage, null)
+        if (slot == "hex-a4-landscape") {
+          img.scaleToFit(120f, 35f)
+          img.setAbsolutePosition(80f - (img.getScaledWidth() / 2), 570f - (img.getScaledHeight() / 2))
+        } else if (slot == "iso-a4" || slot == "grid-a4") {
+          img.scaleToFit(120f, 35f)
+          img.setAbsolutePosition(90f - (img.getScaledWidth() / 2), 810f - (img.getScaledHeight() / 2))
+        } else {
+          img.scaleToFit(170f,50f)
+          img.setAbsolutePosition(127f - (img.getScaledWidth() / 2), 800f - (img.getScaledHeight() / 2))
+        }
+        canvas.addImage(img)
+      } catch {
+        case e: Exception => e.printStackTrace
+      }
+      canvas.endLayer()
+    }
+  }
+
   def logoImage(gameData: GameData, character: CharacterData): String = {
     val fileName: String = character.logo.flatMap(_.fileName).getOrElse(
       gameData.game match {
@@ -1056,23 +1095,7 @@ object Composer extends Controller {
       canvas.endLayer()
 
       //  logo
-      if (page.slot == "core" || page.slot == "eidolon") {
-        canvas.setGState(defaultGstate)
-        val imgLayer = new PdfLayer("Logo image", writer)
-        canvas.beginLayer(imgLayer)
-        val imgFile = logoImage(gameData, character)
-        try {
-          println("Adding logo: "+imgFile)
-          val awtImage = java.awt.Toolkit.getDefaultToolkit().createImage(imgFile)
-          val img = Image.getInstance(awtImage, null)
-          img.scaleToFit(170f,50f)
-          img.setAbsolutePosition(127f - (img.getScaledWidth() / 2), 800f - (img.getScaledHeight() / 2))
-          canvas.addImage(img)
-        } catch {
-          case e: Exception => e.printStackTrace
-        }
-        canvas.endLayer()
-      }
+      writeLogo(canvas, writer, page.slot, gameData, Some(character), None)
 
       //  watermark
       if (character.watermark != "") {

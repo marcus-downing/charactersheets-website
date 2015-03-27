@@ -2,7 +2,8 @@
   gameData: models.GameData,
   iconics: List[models.IconicImage],
   iconicSets: List[models.IconicSet],
-  logos: List[models.Logo]
+  logos: List[models.Logo],
+  logoSets: List[models.LogoSet]
 )
 @import IconicImage.slug
 @import controllers.Application.isAprilFool
@@ -219,7 +220,7 @@
 
           <div class='well' id='logo'>
             @for(logo <- logos) {
-              <img src='@logo.url' id='logo-@logo.code' class='@(if (logo.code == gameData.game) "selected" else "")' />
+              <img src='@logo.url' id='logo-@logo.code' class='@(if (logo.code == gameData.defaultLogo) "selected" else "")' />
             }
             <p><a class='button' href='javascript:void(0);' id='select-logo-button'>Select logo</a></p>
           </div>
@@ -446,19 +447,19 @@
 
     <section class='dialog select-dialog' id='iconic-select-dialog'><div class='inner'>
       <h2>Select a character picture</h2>
-      <div id='iconic-set-list'>
+      <div id='iconic-set-list' class='set-list'>
         <a id='iconic-select-generic' data-set-id='generic' class='selected'>
           <span class='group'>Dyslexic Studeos</span>
           <span class='name'>General purpose</span>
         </a>
         @for(set <- iconicSets) {
-          <a id='iconic-select-@set.id' data-set-id='@set.id'>
+          <a id='iconic-select-@set.id' data-set-id='iconic-image-list-@set.id'>
             <span class='group'>@set.groupDisplayName</span>
             <span class='name'>@set.setDisplayName</span>
           </a>
         }
       </div>
-      <div id='iconic-image-list' class='well'>
+      <div id='iconic-image-list' class='image-list well'>
         <div id='iconic-image-list-custom'>
           <fieldset id='inventory-iconic-custom'>
             <h2>Custom picture</h2>
@@ -485,9 +486,38 @@
 
     <section class='dialog select-dialog' id='logo-select-dialog'><div class='inner'>
       <h2>Select a logo</h2>
-      <div id='logo-list' class='well image-select-set'>
-        @for(logo <- logos) {
-          <a data-id='@logo.code'><img src='@logo.url'/>@logo.name</a>
+      <div id='logo-set-list' class='set-list'>
+        <a id='logo-select-generic' data-set-id='logo-list-generic' class='selected'>
+          <span class='group'>Dyslexic Studeos</span>
+          <span class='name'>General purpose</span>
+        </a>
+        @for(set <- logoSets) {
+          <a id='logo-select-@set.id' data-set-id='logo-list-@set.id'>
+            <span class='group'>@set.groupDisplayName</span>
+            <span class='name'>@set.setDisplayName</span>
+          </a>
+        }
+      </div>
+      <div id='logo-list' class='image-list well'>
+        <div id='logo-list-custom'>
+          <fieldset id='logo-custom'>
+            <h2>Custom picture</h2>
+            <p><label for='logo-custom-file'>Upload a picture</label>
+              <input type='file' name='logo-custom-file' id='logo-custom-file'/></p>
+            <p><a class='button' id='logo-custom-file-ok-button'/>OK</a> &nbsp; 
+              <a class='button' id='logo-custom-file-cancel-button'/>Cancel</a></p>
+          </fieldset>
+        </div>
+        <div id='logo-list-generic' class='image-select-set selected'>
+          <a data-id='none'><img src='/images/iconics/none.png'/>None</a>
+          <a data-id='custom'><img src='/images/iconics/custom.png'/>Upload your own</a>
+        </div>
+        @for(set <- logoSets) {
+          <div id='logo-list-@set.id' class='image-select-set'>
+            @for(logo <- set.logos) {
+              <a data-id='@logo.code'><img src='/images/progress.gif' data-src='@logo.url'/>@logo.name</a>
+            }
+          </div>
         }
       </div>
     </div></section>

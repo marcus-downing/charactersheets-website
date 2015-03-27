@@ -173,13 +173,15 @@ $(function() {
     $("#blanket, #iconic-select-dialog").fadeIn("fast");
   });
 
-  $("#iconic-set-list a").click(function () {
+  $(".set-list a").click(function () {
     var setId = $(this).data('set-id');
-    $("#iconic-set-list a").removeClass("selected");
+    var setList = $(this).closest('.set-list');
+    var imageList = $(this).closest('.select-dialog').find('.image-list');
+    setList.find("a").removeClass("selected");
     $(this).addClass("selected");
-    $("#iconic-image-list > div").removeClass("selected");
-    $("#iconic-image-list-"+setId).addClass("selected");
-    $("#iconic-image-list-"+setId+" img").each(function () {
+    imageList.find("> div").removeClass("selected");
+    $("#"+setId).addClass("selected");
+    $("#"+setId+" img").each(function () {
       $(this).attr("src", $(this).data("src"));
     });
   });
@@ -203,7 +205,7 @@ $(function() {
     $("#iconic img").removeClass("selected");
     $("#iconic-custom").addClass("selected");
     $("#blanket, #iconic-select-dialog").fadeOut("fast");
-  })
+  });
 
   $("#iconic-custom-file-cancel-button").click(function () {
     $("#blanket, #iconic-select-dialog").fadeOut("fast");
@@ -216,12 +218,28 @@ $(function() {
 
   $("#logo-list a").click(function () {
     var logo = $(this).data("id");
-    $("#logo-select").val(logo);
-    $("#logo img, #gm-logo img").removeClass("selected");
-    $("#logo-"+logo+", #gm-logo-"+logo).addClass("selected");
-    // close
+    if (logo == "custom") {
+      $("#logo-list > div").removeClass("selected");
+      $("#logo-list-custom").addClass("selected");
+    } else {
+      $("#logo-select").val(logo);
+      $("#logo img, #gm-logo img").removeClass("selected");
+      $("#logo-"+logo+", #gm-logo-"+logo).addClass("selected");
+      // close
+      $("#blanket, #logo-select-dialog").fadeOut("fast");
+    }
+  });
+
+  $("#logo-custom-file-ok-button").click(function () {
+    $("#logo-select").val("custom");
+    $("#logo img").removeClass("selected");
+    $("#logo-custom").addClass("selected");
     $("#blanket, #logo-select-dialog").fadeOut("fast");
-  })
+  });
+
+  $("#logo-custom-file-cancel-button").click(function () {
+    $("#blanket, #logo-select-dialog").fadeOut("fast");
+  });
 
 
   var nextcharid = 1;
