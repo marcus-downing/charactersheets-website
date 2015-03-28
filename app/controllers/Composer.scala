@@ -30,6 +30,13 @@ object Composer extends Controller {
       println("File at "+filepart.ref.file.getAbsolutePath)
       filepart.ref.file
     }
+    val customAnimalIconic = request.body.file("animal-iconic-custom-file").map{ filepart =>
+      for (contentType <- filepart.contentType)
+        println("File uploaded with content type: "+contentType)
+      println("File named "+filepart.filename)
+      println("File at "+filepart.ref.file.getAbsolutePath)
+      filepart.ref.file
+    }
     val customLogo = request.body.file("logo-custom-file").map{ filepart =>
       for (contentType <- filepart.contentType)
         println("File uploaded with content type: "+contentType)
@@ -39,7 +46,6 @@ object Composer extends Controller {
     }
 
     val bodydata = request.body.asFormUrlEncoded
-    //val data: Map[String, String] = bodydata.flatMap { case (key, list) => key -> list.headOption } toMap
     val data: Map[String, String] = bodydata.mapValues { _.head }
     val sourceFolder = new File("public/pdf/"+gameData.game)
 
@@ -55,7 +61,7 @@ object Composer extends Controller {
     data.get("start-type") match {
       case Some("single") =>
         println("Single...")
-        val character = CharacterData.parse(data, gameData, customIconic, customLogo)
+        val character = CharacterData.parse(data, gameData, customIconic, customAnimalIconic, customLogo)
         if (character.hasCustomIconic) println("Custom iconic found")
         if (character.hasCustomLogo) println("Custom logo found")
 
@@ -102,7 +108,7 @@ object Composer extends Controller {
 
       case Some("all") =>
         println("Party...")
-        val character = CharacterData.parse(data, gameData, customIconic, customLogo)
+        val character = CharacterData.parse(data, gameData, customIconic, None, customLogo)
         val pdf = composeAll(character, gameData, sourceFolders, language)
         Ok(pdf).as("application/pdf").withHeaders(
           "Content-disposition" -> ("attachment; filename=\""+gameData.name+".pdf\"")
@@ -781,10 +787,10 @@ object Composer extends Controller {
             println("Image: "+imgFilename)
             val awtImage = java.awt.Toolkit.getDefaultToolkit().createImage(imgFilename)
             val img = Image.getInstance(awtImage, null)
-            img.scaleToFit(190f,220f)
+            img.scaleToFit(180f,215f)
             slot match {
               case "inventory" => 
-                img.setAbsolutePosition(315f - (img.getScaledWidth() / 2), 410f)
+                img.setAbsolutePosition(315f - (img.getScaledWidth() / 2), 418f)
                 copyrightX = 234f; copyrightY = 410f
               case "background" => 
                 img.setAbsolutePosition(127f - (img.getScaledWidth() / 2), 425f)
@@ -798,9 +804,9 @@ object Composer extends Controller {
               if (copyrightX != 0) {
                 val fadedGState = new PdfGState
                 fadedGState.setBlendMode(PdfGState.BM_NORMAL)
-                fadedGState.setFillOpacity(0.8f)
+                // fadedGState.setFillOpacity(0.8f)
                 canvas.setGState(fadedGState)
-                canvas.setFontAndSize(textFont, 7.5f)
+                canvas.setFontAndSize(textFont, 7f)
                 canvas.showTextAligned(Element.ALIGN_LEFT, "© "+cp.copyright, copyrightX, copyrightY, 0)
               }
             }
@@ -1154,7 +1160,7 @@ class CharacterInterpretation(gameData: GameData, character: CharacterData) {
       pages = pages ::: List(PageSlot("lycanthrope", None))
     if (character.includePartyFunds)
       pages = pages ::: List(PageSlot("partyfunds", None))
-    if (character.includeAnimalCompanion)
+    if (character.includeAnimalCompanion && character.hasAnimalIconic)
       pages = pages ::: List(PageSlot("animalcompanion", None), PageSlot("mini-animal", Some(character.miniAnimalSize)))
     if (character.includeMini)
       pages = pages ::: List(PageSlot("mini", Some(character.miniSize)))

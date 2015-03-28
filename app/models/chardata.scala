@@ -10,7 +10,7 @@ object CharacterData {
     keys.filter(key => data.get(key) == Some("on"))
   }
 
-  def parse(data: Map[String, String], gameData: GameData, customIconic: Option[File], customLogo: Option[File]): CharacterData = {
+  def parse(data: Map[String, String], gameData: GameData, customIconic: Option[File], customAnimalIconic: Option[File], customLogo: Option[File]): CharacterData = {
     //val data2 = data.flatMap { case (key, list) => key -> list.headOption }
     //println("Data 2 "+data2)
     val positive = positiveData(data)
@@ -39,9 +39,11 @@ object CharacterData {
 
     val variantRules: List[String] = positive.filter(_.startsWith("variant-")).map(_.substring("variant-".length))
     val inventoryIconic = data.get("inventory-iconic").getOrElse("default")
+    val animalIconic = data.get("animal-iconic").getOrElse("none")
 
     println("Given iconic: "+data.get("inventory-iconic").getOrElse("(none)"))
     if (customIconic.isDefined) println("Custom iconic uploaded")
+    if (customAnimalIconic.isDefined) println("Custom animal companion iconic uploaded")
     if (customLogo.isDefined) println("Custom logo uploaded")
 
     // data
@@ -52,6 +54,8 @@ object CharacterData {
       inventoryStyle = data.get("inventory-style").getOrElse("auto"),
       inventoryIconic = inventoryIconic,
       customIconic = if (inventoryIconic == "custom") customIconic else None,
+      animalIconic = animalIconic,
+      customAnimalIconic = if (animalIconic == "custom") customAnimalIconic else None,
       logo = Logo.get(data.get("logo").getOrElse(gameData.game)),
       customLogo = if (data.get("logo") == "custom") customLogo else None,
 
@@ -81,9 +85,9 @@ object CharacterData {
     val stashedCharacters = charids.map { charid =>
       val prefix = "char-"+charid+"-"
       val subdata: Map[String, String] = data.filterKeys(_.startsWith(prefix)).map { case (key, value) => key.substring(prefix.length) -> value } toMap;
-      parse(subdata, gameData, None, None)
+      parse(subdata, gameData, None, None, customLogo)
     }
-    val finalCharacter = parse(data, gameData, None, customLogo)
+    val finalCharacter = parse(data, gameData, None, None, customLogo)
     stashedCharacters ::: (finalCharacter :: Nil)
   }
 
@@ -128,6 +132,8 @@ case class CharacterData (
   inventoryStyle: String,
   inventoryIconic: String,
   customIconic: Option[File],
+  animalIconic: String,
+  customAnimalIconic: Option[File],
   logo: Option[Logo],
   customLogo: Option[File],
 
@@ -150,6 +156,7 @@ case class CharacterData (
   variantRules: List[String]
 ) {
   def hasCustomIconic = customIconic.isDefined
+  def hasAnimalIconic = animalIconic != "generic" && animalIconic != "none" && !(animalIconic == "custom" && !customAnimalIconic.isDefined)
   def hasCustomLogo = customLogo.isDefined
   def iconic: Option[IconicImage] = IconicImage.get(inventoryIconic)
 }
