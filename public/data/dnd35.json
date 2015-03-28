@@ -59,6 +59,13 @@
         "Spellcraft", "Spot", "Survival", "Swim", "Tumble", "Use Magic Device", "Use Rope"
     ],
 
+    "summarySkills": [
+        "Appraise", "Balance", "Climb", "Decipher Script", "Diplomacy", "Disguise", 
+        "Escape Artist", "Gather Information", "Handle Animal", "Heal", "Hide", "Intimidate", 
+        "Listen", "Move Silently", "Ride", "Sense Motive", "Sleight of Hand", 
+        "Spellcraft", "Spot", "Survival", "Swim", "Tumble", "Use Magic Device"
+    ],
+
     "knowledgeSkills": [
         "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (religion)", "Knowledge (planes)"
     ],
@@ -163,15 +170,15 @@
 
     "gm": {
         "characters": [
-            { "file": "GM/Party 4.pdf", "name": "Party", "slot": "party", "variant": "4" },
-            { "file": "GM/Party 5.pdf", "name": "Party", "slot": "party", "variant": "5" },
-            { "file": "GM/Party 6.pdf", "name": "Party", "slot": "party", "variant": "6" },
-            { "file": "GM/Party 7.pdf", "name": "Party", "slot": "party", "variant": "7" },
-            { "file": "GM/Party 8.pdf", "name": "Party", "slot": "party", "variant": "8" },
-            { "file": "GM/Party 9.pdf", "name": "Party", "slot": "party", "variant": "9" },
-            { "file": "GM/Party 10.pdf", "name": "Party", "slot": "party", "variant": "10" },
-            { "file": "GM/NPC.pdf", "name": "NPC", "slot": "npc" },
-            { "file": "GM/NPC Group.pdf", "name": "NPC Group", "slot": "npc-group" }
+            { "file": "DM/Party 4.pdf", "name": "Party", "slot": "party", "variant": "4" },
+            { "file": "DM/Party 5.pdf", "name": "Party", "slot": "party", "variant": "5" },
+            { "file": "DM/Party 6.pdf", "name": "Party", "slot": "party", "variant": "6" },
+            { "file": "DM/Party 7.pdf", "name": "Party", "slot": "party", "variant": "7" },
+            { "file": "DM/Party 8.pdf", "name": "Party", "slot": "party", "variant": "8" },
+            { "file": "DM/Party 9.pdf", "name": "Party", "slot": "party", "variant": "9" },
+            { "file": "DM/Party 10.pdf", "name": "Party", "slot": "party", "variant": "10" },
+            { "file": "DM/NPC.pdf", "name": "NPC", "slot": "npc" },
+            { "file": "DM/NPC Group.pdf", "name": "NPC Group", "slot": "npc-group" }
         ],
         "campaign": [
             { "file": "GM/Timeline (Portrait).pdf", "name": "Timeline (Portrait)" },

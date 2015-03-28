@@ -57,6 +57,13 @@
         "Use Magic Device"
     ],
 
+    "summarySkills": [
+        "Acrobatics", "Appraise", "Bluff", "Climb", "Diplomacy", "Disable Device", "Disguise",
+        "Escape Artist", "Fly", "Handle Animal", "Heal", "Intimidate", "Linguistics", "Perception",
+        "Ride", "Sense Motive", "Sleight of Hand", "Spellcraft", "Stealth", "Survival", "Swim",
+        "Use Magic Device"
+    ],
+
     "knowledgeSkills": [
         "Knowledge (arcana)", "Knowledge (dungeoneering)", "Knowledge (engineering)", "Knowledge (geography)", "Knowledge (history)", "Knowledge (local)", "Knowledge (nature)", "Knowledge (nobility)", "Knowledge (planes)", "Knowledge (religion)"
     ],
@@ -349,7 +356,7 @@
             { "file": "GM/Party 9.pdf", "name": "Party", "slot": "party", "variant": "9" },
             { "file": "GM/Party 10.pdf", "name": "Party", "slot": "party", "variant": "10" },
             { "file": "GM/NPC.pdf", "name": "NPC", "slot": "npc" },
-            { "file": "GM/NPC Group.pdf", "name": "NPC Group", "slot": "npc-party" }
+            { "file": "GM/NPC Group.pdf", "name": "NPC Group", "slot": "npc-group" }
         ],
         "campaign": [
             { "file": "GM/Timeline (Portrait).pdf", "name": "Timeline (Portrait)" },
