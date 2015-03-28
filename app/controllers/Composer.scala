@@ -153,7 +153,7 @@ object Composer extends Controller {
         canvas.addTemplate(template, 0, 0)
         writeCopyright(canvas, writer, gameData)
 
-        if (page.slot == "party" || page.slot == "npc-party")
+        if (page.slot == "party" || page.slot == "npc-group")
           writeSkills(canvas, writer, page, gameData, None, language)
 
         writeColourOverlay(canvas, gmdata.colour, pageSize)
@@ -237,7 +237,7 @@ object Composer extends Controller {
 
   def locatePageFile(folders: List[File], filename: String): Option[File] = {
     val availableFiles = folders.map(folder => new File(folder.getPath+"/"+filename)).filter(_.exists)
-    println("Locate file: "+availableFiles.map(_.getPath).mkString(", "))
+    println("Locate file: "+filename+": "+availableFiles.map(_.getPath).mkString(", "))
     availableFiles.headOption
   }
 
@@ -370,17 +370,25 @@ object Composer extends Controller {
 
   //  1mm = 2.8pt
   def writeSkills(canvas: PdfContentByte, writer: PdfWriter, page: Page,  gameData: GameData, character: Option[CharacterData], language: String) {
-    val coreSkills = gameData.coreSkills
     val classSkills: List[String] = character.map(_.classes.flatMap(_.skills).distinct).getOrElse(Nil)
-    val knowledgeSkills = if (character.map(_.allKnowledge).getOrElse(false)) gameData.knowledgeSkills else Nil
-    val bonusSkills = if (isAprilFool) "Knowledge (aeronautics)" :: Nil else Nil
-    println("Core skills: "+coreSkills.mkString(", "))
-    println("Class skills: "+classSkills.mkString(", "))
-    if (knowledgeSkills != Nil) println("Knowledge skills: "+knowledgeSkills.mkString(", "))
-    if (bonusSkills != Nil) println("Bonus skills: "+bonusSkills.mkString(", "))
 
-    val skills = (gameData.coreSkills ::: classSkills ::: knowledgeSkills ::: bonusSkills).distinct.flatMap { name =>
-      gameData.getSkill(name)
+    val skills: List[Skill] = if (page.slot == "party" || page.slot == "npc-group") {
+      val summarySkills = gameData.summarySkills
+      summarySkills.flatMap { name =>
+        gameData.getSkill(name)
+      }
+    } else {
+      val coreSkills = gameData.coreSkills
+      val knowledgeSkills = if (character.map(_.allKnowledge).getOrElse(false)) gameData.knowledgeSkills else Nil
+      val bonusSkills = if (isAprilFool) "Knowledge (aeronautics)" :: Nil else Nil
+      println("Core skills: "+coreSkills.mkString(", "))
+      println("Class skills: "+classSkills.mkString(", "))
+      if (knowledgeSkills != Nil) println("Knowledge skills: "+knowledgeSkills.mkString(", "))
+      if (bonusSkills != Nil) println("Bonus skills: "+bonusSkills.mkString(", "))
+
+      (gameData.coreSkills ::: classSkills ::: knowledgeSkills ::: bonusSkills).distinct.flatMap { name =>
+        gameData.getSkill(name)
+      }
     }
 
     // translate skill names before sorting them
@@ -642,7 +650,7 @@ object Composer extends Controller {
       SkillPoints(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
 
-    case "npc-party" =>
+    case "npc-group" =>
       val firstLine = 452.25f
       val lineIncrement = -13.55f
       val skillsAreaLeft = 28f
