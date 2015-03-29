@@ -3,6 +3,13 @@
 		{
 			"name": "italian",
 			"translations": [
+				{ "original": "STR", "translation": "FOR" },
+				{ "original": "DEX", "translation": "DES" },
+				{ "original": "CON", "translation": "COS" },
+				{ "original": "INT", "translation": "INT" },
+				{ "original": "WIS", "translation": "SAG" },
+				{ "original": "CHA", "translation": "CAR" },
+
 				{ "original": "Acrobatics", "translation": "Acrobazia" },
 				{ "original": "Appraise", "translation": "Valutare" },
 				{ "original": "Autohypnosis", "translation": "Autoipnosi" },
@@ -62,6 +69,13 @@
 		{
 			"name": "spanish",
 			"translations": [
+				{ "original": "STR", "translation": "FUE" },
+				{ "original": "DEX", "translation": "DES" },
+				{ "original": "CON", "translation": "CON" },
+				{ "original": "INT", "translation": "INT" },
+				{ "original": "WIS", "translation": "SAB" },
+				{ "original": "CHA", "translation": "CAR" },
+
 				{ "original": "Acrobatics", "translation": "Acrobacias" },
 				{ "original": "Appraise", "translation": "Tasación" },
 				{ "original": "Bluff", "translation": "Engañar" },
@@ -121,6 +135,13 @@
 		{
 			"name": "polish",
 			"translations": [
+				{ "original": "STR", "translation": "S" },
+				{ "original": "DEX", "translation": "ZR" },
+				{ "original": "CON", "translation": "BD" },
+				{ "original": "INT", "translation": "INT" },
+				{ "original": "WIS", "translation": "RZT" },
+				{ "original": "CHA", "translation": "CHA" },
+
 				{ "original": "Acrobatics", "translation": "Zwinność" },
 				{ "original": "Appraise", "translation": "Szacowanie" },
 				{ "original": "Bluff", "translation": "Blefowanie" },

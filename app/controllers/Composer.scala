@@ -481,7 +481,7 @@ object Composer extends Controller {
           writeCheckbox(useUntrainedMiddle, y, true)
         }
 
-        val ability = if (skill.ability.length > 0) skill.ability else "/"
+        val ability = if (skill.ability.length > 0) translate(skill.ability).getOrElse(skill.ability) else "/"
         canvas.setFontAndSize(attrFont, attrFontSize)
         canvas.setColorFill(attrColour)
         canvas.setGState(fadedGState)
