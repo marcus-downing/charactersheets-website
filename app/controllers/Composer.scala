@@ -1044,10 +1044,10 @@ object Composer extends Controller {
       gameData.game match {
         case "pathfinder" =>
           if (character.classes.exists(_.pages.exists(_.startsWith("core/neoexodus"))))
-            "neoexodus.png"
+            "pathfinder/neoexodus.png"
           else
-            "pathfinder.png"
-        case "dnd35" => "dnd35.png"
+            "pathfinder/pathfinder.png"
+        case "dnd35" => "dnd35/dnd35.png"
         case _ => ""
       }
     )
@@ -1057,8 +1057,8 @@ object Composer extends Controller {
   def logoImage(gameData: GameData, logo: Option[Logo]): String = {
     val fileName: String = logo.flatMap(_.fileName).getOrElse(
       gameData.game match {
-        case "pathfinder" => "pathfinder.png"
-        case "dnd35" => "dnd35.png"
+        case "pathfinder" => "pathfinder/pathfinder.png"
+        case "dnd35" => "dnd35/dnd35.png"
         case _ => ""
       }
     )
