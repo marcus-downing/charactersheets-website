@@ -15,7 +15,8 @@ object Application extends Controller {
 
   def isAprilFool = {
     val today = new DateTime().toLocalDate
-    isFakeAprilFool || (today.getDayOfMonth == 1 && today.getMonthOfYear == 4)
+    // isFakeAprilFool || (today.getDayOfMonth == 1 && today.getMonthOfYear == 4)
+    false
   }
 
   // index
