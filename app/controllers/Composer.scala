@@ -453,7 +453,9 @@ object Composer extends Controller {
       canvas.setFontAndSize(skillFont, skillFontSize)
       canvas.setColorFill(stdColour)
       canvas.setGState(defaultGstate)
+      canvas.beginText
       canvas.showTextAligned(Element.ALIGN_LEFT, skill.skillName, nameLeft, y, 0)
+      canvas.endText
 
       if (isSubSkill) {
         val top = firstLine + (pos - 1) * lineIncrement + lineBottomOffset
@@ -485,7 +487,9 @@ object Composer extends Controller {
         canvas.setFontAndSize(attrFont, attrFontSize)
         canvas.setColorFill(attrColour)
         canvas.setGState(fadedGState)
+        canvas.beginText
         canvas.showTextAligned(Element.ALIGN_CENTER, ability, abilityMiddle, y + abilityOffset, 0)
+        canvas.endText
 
         canvas.setGState(defaultGstate)
 
@@ -508,14 +512,18 @@ object Composer extends Controller {
           canvas.setFontAndSize(attrFont, attrFontSize - 2)
           canvas.setColorFill(attrColour)
           canvas.setGState(fadedGState)
+          canvas.beginText
           canvas.showTextAligned(Element.ALIGN_CENTER, "/", ranksMiddle, y + abilityOffset / 2, 0)
+          canvas.endText
           canvas.setGState(defaultGstate)
         }
 
         if (skill.acp) {
           canvas.setColorFill(stdColour)
           canvas.setFontAndSize(attrFont, attrFontSize)
+          canvas.beginText
           canvas.showTextAligned(Element.ALIGN_CENTER, "-", skillsAreaRight - acpWidth - 5, y - 1, 0)
+          canvas.endText
 
           canvas.setColorStroke(stdColour)
           val isAcpDouble = gameData.isDnd35 && skill.name == "Swim"
@@ -530,7 +538,9 @@ object Composer extends Controller {
             canvas.setFontAndSize(attrFont, attrFontSize - 2)
             canvas.setColorFill(attrColour)
             canvas.setGState(fadedGState)
+            canvas.beginText
             canvas.showTextAligned(Element.ALIGN_CENTER, "x 2", skillsAreaRight - acpWidth / 2, y + abilityOffset / 2, 0)
+            canvas.endText
             canvas.setGState(defaultGstate)
           }
         }
@@ -538,7 +548,9 @@ object Composer extends Controller {
         if (page.variant == Some("barbarian") && skill.noRage) {
           canvas.setColorFill(black)
           canvas.setFontAndSize(xFont, skillFontSize)
+          canvas.beginText
           canvas.showTextAligned(Element.ALIGN_CENTER, "X", rageMiddle, y - 1, 0)
+          canvas.endText
         }
 
         if (page.variant == Some("ranger")) {
@@ -569,6 +581,7 @@ object Composer extends Controller {
             else skillsAreaRight - acpWidth + 3f
           val linesl = sigilr + 2f
 
+          canvas.beginText
           canvas.setColorFill(stdColour)
           canvas.setFontAndSize(skillFont, 8f)
           canvas.showTextAligned(Element.ALIGN_RIGHT, sigil, sigilr, y - 1f, 0)
@@ -576,6 +589,7 @@ object Composer extends Controller {
           canvas.setFontAndSize(skillFont, 4.5f)
           canvas.showTextAligned(Element.ALIGN_LEFT, line1, linesl, y + 3f, 0)
           canvas.showTextAligned(Element.ALIGN_LEFT, line2, linesl, y - 2f, 0)
+          canvas.endText
         }
 
         if (gameData.isPathfinder) {
@@ -911,8 +925,8 @@ object Composer extends Controller {
     canvas.beginText
     val watermarkLayer = new PdfLayer("Watermark", writer)
     canvas.beginLayer(watermarkLayer)
-    val font = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.EMBEDDED)
-    canvas.setFontAndSize(font, (900f / watermark.length).toInt)
+    // val font = BaseFont.createFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.EMBEDDED)
+    canvas.setFontAndSize(altFont, (900f / watermark.length).toInt)
     //canvas.setColorFill(new BaseColor(0f, 0f, 0f))
     canvas.setColorFill(interpretColour(colour))
 
@@ -961,11 +975,12 @@ object Composer extends Controller {
     }
   }
 
-  def textFont = BaseFont.createFont("public/fonts/Roboto-Condensed.ttf", BaseFont.CP1252, true)
-  def textFontBold = BaseFont.createFont("public/fonts/Roboto-BoldCondensed.ttf", BaseFont.CP1252, true)
-  def altFont = BaseFont.createFont("public/fonts/Merriweather-Black.ttf", BaseFont.CP1252, true)
-  def barbarianFont = BaseFont.createFont("public/fonts/Amatic-Bold.ttf", BaseFont.CP1252, true)
-  def barbarianFont2 = BaseFont.createFont("public/fonts/dirty-duo.ttf", BaseFont.CP1252, true)
+  val encoding = BaseFont.IDENTITY_H
+  def textFont = BaseFont.createFont("public/fonts/Roboto-Condensed.ttf", encoding, true)
+  def textFontBold = BaseFont.createFont("public/fonts/Roboto-BoldCondensed.ttf", encoding, true)
+  def altFont = BaseFont.createFont("public/fonts/Merriweather-Black.ttf", encoding, true)
+  def barbarianFont = BaseFont.createFont("public/fonts/Amatic-Bold.ttf", encoding, true)
+  def barbarianFont2 = BaseFont.createFont("public/fonts/dirty-duo.ttf", encoding, true)
 
   def interpretColour(colour: String): BaseColor = colour match {
     case "light" => new BaseColor(0.3f, 0.3f, 0.3f)
@@ -1172,10 +1187,9 @@ class CharacterInterpretation(gameData: GameData, character: CharacterData) {
 
     //  special cases
     if (character.hideInventory) {
+      println("Removing inventory")
       pages = PageSlot("core", Some("simple")) :: PageSlot("combat", Some("simple")) :: pages
-      println("Slot names (before): "+slotNames.mkString(", "))
       slotNames = slotNames.filter(_ != "inventory")
-      println("Slot names (simplified): "+slotNames.mkString(", "))
     } else if (character.moreClasses) {
       pages = PageSlot("core", Some("more")) :: pages
     }
@@ -1204,7 +1218,7 @@ class CharacterInterpretation(gameData: GameData, character: CharacterData) {
         else
           overridingInstances.head
 
-      println("Selecting page: "+slotName.toString)
+      // println("Selecting page: "+slotName.toString)
       selectedInstance
     }
     
