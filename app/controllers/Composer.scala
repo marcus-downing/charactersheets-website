@@ -1072,7 +1072,7 @@ object Composer extends Controller {
   def logoImage(gameData: GameData, logo: Option[Logo]): String = {
     val fileName: String = logo.flatMap(_.fileName).getOrElse(
       gameData.game match {
-        case "pathfinder" => "pathfinder/pathfinder.png"
+        case "pathfinder" => "pathfinder/Pathfinder.png"
         case "dnd35" => "dnd35/dnd35.png"
         case _ => ""
       }
