@@ -1061,7 +1061,7 @@ object Composer extends Controller {
           if (character.classes.exists(_.pages.exists(_.startsWith("core/neoexodus"))))
             "pathfinder/neoexodus.png"
           else
-            "pathfinder/pathfinder.png"
+            "pathfinder/Pathfinder.png"
         case "dnd35" => "dnd35/dnd35.png"
         case _ => ""
       }
