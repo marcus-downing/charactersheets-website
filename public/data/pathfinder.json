@@ -647,7 +647,7 @@
         {
             "name": "Paladin",
             "pages": [ "paladin", "inventory/without", "spellbook" ],
-            "skills": [ "Acrobatics", "Climb", "Escape Artist", "Intimidate", "Knowledge (history)", "Knowledge (religion)", "Perception", "Profession", "Ride", "Sense Motive", "Stealth", "Swim" ],
+            "skills": [ "Diplomacy", "Handle Animal", "Heal", "Knowledge (nobility)", "Knowledge (religion)", "Ride", "Sense Motive", "Spellcraft" ],
             "variants": [
                 { "name": "Paladin", "pages": [ ] },
                 { "name": "Antipaladin", "pages": [ "paladin/antipaladin" ] },
