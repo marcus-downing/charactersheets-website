@@ -387,8 +387,8 @@ object Composer extends Controller {
       val coreSkills = gameData.coreSkills
       val knowledgeSkills = if (character.map(_.allKnowledge).getOrElse(false)) gameData.knowledgeSkills else Nil
       val bonusSkills = if (isAprilFool) "Knowledge (aeronautics)" :: Nil else Nil
-      println("Core skills: "+coreSkills.mkString(", "))
-      println("Class skills: "+classSkills.mkString(", "))
+      // println("Core skills: "+coreSkills.mkString(", "))
+      // println("Class skills: "+classSkills.mkString(", "))
       if (knowledgeSkills != Nil) println("Knowledge skills: "+knowledgeSkills.mkString(", "))
       if (bonusSkills != Nil) println("Bonus skills: "+bonusSkills.mkString(", "))
 
@@ -1173,10 +1173,15 @@ class CharacterInterpretation(gameData: GameData, character: CharacterData) {
     }
     if (character.includeLycanthrope)
       pages = pages ::: List(PageSlot("lycanthrope", None))
+    if (character.includeIntelligentItem)
+      pages = pages ::: List(PageSlot("intelligent-item", None))
     if (character.includePartyFunds)
       pages = pages ::: List(PageSlot("partyfunds", None))
-    if (character.includeAnimalCompanion && character.hasAnimalIconic)
-      pages = pages ::: List(PageSlot("animalcompanion", None), PageSlot("mini-animal", Some(character.miniAnimalSize)))
+    if (character.includeAnimalCompanion) {
+      pages = pages ::: List(PageSlot("animalcompanion", None))
+      if (character.hasAnimalIconic)
+        pages = pages ::: List(PageSlot("mini-animal", Some(character.miniAnimalSize)))
+    }
     if (character.includeMini)
       pages = pages ::: List(PageSlot("mini", Some(character.miniSize)))
 
