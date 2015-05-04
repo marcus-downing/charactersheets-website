@@ -805,7 +805,7 @@
 
         {
             "name": "Hunter",
-            "pages": [ "hunter", "inventory" ],
+            "pages": [ "hunter", "inventory", "animalcompanion", "spellbook" ],
             "skills": [ "Climb", "Handle Animal", "Heal", "Intimidate", "Knowledge (dungeoneering)", "Knowledge (geography)", "Knowledge (nature)", "Perception", "Ride", "Spellcraft", "Stealth", "Survival", "Swim", "Track" ]
         },
 
