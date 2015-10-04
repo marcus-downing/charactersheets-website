@@ -293,6 +293,8 @@ object Composer extends Controller {
       // skills
       if (page.slot == "core")
         writeSkills(canvas, writer, page, gameData, Some(character), language)
+      if (page.slot == "eidolon")
+        writeSkills(canvas, writer, page, gameData, Some(character.makeEidolon(gameData)), language)
 
       // variant rules
       if (!character.variantRules.isEmpty) {
@@ -376,25 +378,31 @@ object Composer extends Controller {
 
   //  1mm = 2.8pt
   def writeSkills(canvas: PdfContentByte, writer: PdfWriter, page: Page,  gameData: GameData, character: Option[CharacterData], language: String) {
-    val classSkills: List[String] = character.map(_.classes.flatMap(_.skills).distinct).getOrElse(Nil)
+    var classSkills: List[String] = character.map(_.classes.flatMap(_.skills).distinct).getOrElse(Nil)
+    val bonusSkills = if (isAprilFool) "Knowledge (aeronautics)" :: Nil else Nil
 
-    val skills: List[Skill] = if (page.slot == "party" || page.slot == "npc-group") {
-      val summarySkills = gameData.summarySkills
-      summarySkills.flatMap { name =>
-        gameData.getSkill(name)
-      }
-    } else {
-      val coreSkills = gameData.coreSkills
-      val knowledgeSkills = if (character.map(_.allKnowledge).getOrElse(false)) gameData.knowledgeSkills else Nil
-      val bonusSkills = if (isAprilFool) "Knowledge (aeronautics)" :: Nil else Nil
-      // println("Core skills: "+coreSkills.mkString(", "))
-      // println("Class skills: "+classSkills.mkString(", "))
-      if (knowledgeSkills != Nil) println("Knowledge skills: "+knowledgeSkills.mkString(", "))
-      if (bonusSkills != Nil) println("Bonus skills: "+bonusSkills.mkString(", "))
+    val skills: List[Skill] = page.slot match {
+      case "party" =>
+        gameData.summarySkills.flatMap(gameData.getSkill)
 
-      (gameData.coreSkills ::: classSkills ::: knowledgeSkills ::: bonusSkills).distinct.flatMap { name =>
-        gameData.getSkill(name)
-      }
+      case "npc-group" =>
+        gameData.summarySkills.flatMap(gameData.getSkill)
+
+      case "eidolon" =>
+        val eidolonClass = gameData.classByName("Eidolon")
+        val eidolonSkills: List[String] = eidolonClass.toList.flatMap(_.skills)
+        println("Eidolon skills: "+eidolonSkills.mkString(", "))
+        classSkills = eidolonSkills
+        (gameData.coreSkills ::: eidolonSkills ::: bonusSkills).distinct.flatMap(gameData.getSkill)
+
+      case _ =>
+        val knowledgeSkills = if (character.map(_.allKnowledge).getOrElse(false)) gameData.knowledgeSkills else Nil
+        // println("Core skills: "+coreSkills.mkString(", "))
+        // println("Class skills: "+classSkills.mkString(", "))
+        if (knowledgeSkills != Nil) println("Knowledge skills: "+knowledgeSkills.mkString(", "))
+        if (bonusSkills != Nil) println("Bonus skills: "+bonusSkills.mkString(", "))
+
+        (gameData.coreSkills ::: classSkills ::: knowledgeSkills ::: bonusSkills).distinct.flatMap(gameData.getSkill)
     }
 
     // translate skill names before sorting them
@@ -425,8 +433,8 @@ object Composer extends Controller {
     fadedGState.setBlendMode(PdfGState.BM_NORMAL)
     fadedGState.setFillOpacity(0.3f)
 
-    val skillPoints = getSkillPoints(page, gameData)
-    import skillPoints._
+    val skillLayout = getSkillLayout(page, gameData)
+    import skillLayout._
 
     def writeCheckbox(x: Float, y: Float, filled: Boolean) {
       val radius = 2.4f
@@ -478,7 +486,8 @@ object Composer extends Controller {
         canvas.stroke()
       }
 
-      if (page.slot == "core") {
+      val isCorePage = page.slot == "core" || page.slot == "eidolon"
+      if (isCorePage) {
         if (skill.useUntrained) {
           writeCheckbox(useUntrainedMiddle, y, true)
         }
@@ -518,7 +527,7 @@ object Composer extends Controller {
           canvas.setGState(defaultGstate)
         }
 
-        if (skill.acp) {
+        if (page.slot == "core" && skill.acp) {
           canvas.setColorFill(stdColour)
           canvas.setFontAndSize(attrFont, attrFontSize)
           canvas.beginText
@@ -651,11 +660,11 @@ object Composer extends Controller {
 
   }
 
-  case class SkillPoints (firstLine: Float, lineIncrement: Float, lineBottomOffset: Float, lineBoxHeight: Float, skillsAreaLeft: Float, skillsAreaRight: Float, 
+  case class SkillLayout (firstLine: Float, lineIncrement: Float, lineBottomOffset: Float, lineBoxHeight: Float, skillsAreaLeft: Float, skillsAreaRight: Float, 
     skillNameLeft: Float, skillNameIndent: Float, abilityMiddle: Float, abilityOffset: Float, ranksMiddle: Float,
     useUntrainedMiddle: Float, classSkillMiddle: Float, classSkillIncrement: Float, acpWidth: Float, numSlots: Int,
     rageMiddle: Float, favouredEnemyMiddle: Float)
-  def getSkillPoints(page: Page, gameData: GameData): SkillPoints = page.slot match {
+  def getSkillLayout(page: Page, gameData: GameData): SkillLayout = page.slot match {
     case "party" =>
       val firstLine = 496f
       val lineIncrement = -13.55f
@@ -667,7 +676,7 @@ object Composer extends Controller {
 
       val numSlots = 0
 
-      SkillPoints(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+      SkillLayout(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
 
     case "npc-group" =>
@@ -681,9 +690,39 @@ object Composer extends Controller {
 
       val numSlots = 0
 
-      SkillPoints(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+      SkillLayout(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
 
+    case "eidolon" =>
+      val firstLine = 616f
+      val lineIncrement = -13.51f
+      val lineBottomOffset = -4.5f
+      val lineBoxHeight = 13f
+
+      val skillsAreaLeft = 232f
+      val skillsAreaRight = 567f
+
+      val skillNameLeft = skillsAreaLeft + 2f
+      val skillNameIndent = 16f
+      val abilityMiddle = 420f
+      val abilityOffset = -1f
+
+      val ranksMiddle = 465f
+
+      val useUntrainedMiddle = 366f
+      val classSkillMiddle = 445f
+      val classSkillIncrement = 10f
+
+      val rageMiddle = 524f
+      val favouredEnemyMiddle = 524f
+      val acpWidth = 25f
+
+      val numSlots = 43
+
+      SkillLayout(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
+        skillNameLeft, skillNameIndent, abilityMiddle, abilityOffset, ranksMiddle,
+        useUntrainedMiddle, classSkillMiddle, classSkillIncrement, acpWidth, numSlots,
+        rageMiddle, favouredEnemyMiddle)
 
     case _ if gameData.isPathfinder =>
       println("Pathfinder skill points for page variant: "+page.slot+" / "+page.variant)
@@ -727,7 +766,7 @@ object Composer extends Controller {
 
       val numSlots = 43
 
-      SkillPoints(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
+      SkillLayout(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, abilityMiddle, abilityOffset, ranksMiddle,
         useUntrainedMiddle, classSkillMiddle, classSkillIncrement, acpWidth, numSlots,
         rageMiddle, favouredEnemyMiddle)
@@ -753,25 +792,25 @@ object Composer extends Controller {
 
       val skillNameLeft = skillsAreaLeft + 2f
       val skillNameIndent = 16f
-      val abilityMiddle = 
-        if (isBarbarian) 395f 
-        else if (isRanger) 388f
-        else 383f
+      val abilityMiddle = 383f
+        // if (isBarbarian) 395f 
+        // else if (isRanger) 388f
+        // else 383f
       val abilityOffset = -1f
 
-      val ranksMiddle = 
-        if (isBarbarian) 448f
-        else if (isRanger) 443f
-        else 465f
+      val ranksMiddle = 465f
+        // if (isBarbarian) 448f
+        // else if (isRanger) 443f
+        // else 465f
 
-      val useUntrainedMiddle = 
-        if (isBarbarian) 320f
-        else if (isRanger) 310f
-        else 330f
-      val classSkillMiddle = 
-        if (isBarbarian) 370f
-        else if (isRanger) 370f
-        else 397.7f
+      val useUntrainedMiddle = 330f
+        // if (isBarbarian) 320f
+        // else if (isRanger) 310f
+        // else 330f
+      val classSkillMiddle = 397.7f
+        // if (isBarbarian) 370f
+        // else if (isRanger) 370f
+        // else 397.7f
       val classSkillIncrement = 8f
 
       val rageMiddle = 524f
@@ -780,7 +819,7 @@ object Composer extends Controller {
 
       val numSlots = 43
 
-      SkillPoints(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
+      SkillLayout(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, abilityMiddle, abilityOffset, ranksMiddle,
         useUntrainedMiddle, classSkillMiddle, classSkillIncrement, acpWidth, numSlots,
         rageMiddle, favouredEnemyMiddle)
@@ -1055,18 +1094,25 @@ object Composer extends Controller {
   }
 
   def logoImage(gameData: GameData, character: CharacterData): String = {
-    val fileName: String = character.logo.flatMap(_.fileName).getOrElse(
-      gameData.game match {
-        case "pathfinder" =>
-          if (character.classes.exists(_.pages.exists(_.startsWith("core/neoexodus"))))
-            "pathfinder/neoexodus.png"
-          else
-            "pathfinder/Pathfinder.png"
-        case "dnd35" => "dnd35/dnd35.png"
-        case _ => ""
-      }
-    )
-    "public/images/logos/"+fileName
+    character.customLogo.map{ logo =>
+      val path = logo.getAbsolutePath
+      println("Custom logo: "+path)
+      path
+    }.getOrElse{
+      val fileName: String = character.logo.flatMap(_.fileName).getOrElse(
+        gameData.game match {
+          case "pathfinder" =>
+            if (character.classes.exists(_.pages.exists(_.startsWith("core/neoexodus"))))
+              "pathfinder/neoexodus.png"
+            else
+              "pathfinder/Pathfinder.png"
+          case "dnd35" => "dnd35/dnd35.png"
+          case _ => ""
+        }
+      )
+      println("Non-custom logo: "+fileName)
+      "public/images/logos/"+fileName
+    }
   }
 
   def logoImage(gameData: GameData, logo: Option[Logo]): String = {

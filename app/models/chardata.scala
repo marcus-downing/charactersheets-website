@@ -57,12 +57,13 @@ object CharacterData {
       animalIconic = animalIconic,
       customAnimalIconic = if (animalIconic == "custom") customAnimalIconic else None,
       logo = Logo.get(data.get("logo").getOrElse(gameData.game)),
-      customLogo = if (data.get("logo") == "custom") customLogo else None,
+      customLogo = if (data.get("logo") == Some("custom")) customLogo else None,
 
       includeGM = positive.contains("gm"),
       partyDownload = positive.contains("party-download"),
       hideInventory = positive.contains("simple"),
       moreClasses = positive.contains("more"),
+      skillsStyle = data.get("skills-list-style").getOrElse("normal"),
       allKnowledge = positive.contains("all-knowledge"),
       includeCharacterBackground = positive.contains("include-background"),
       isPathfinderSociety = gameData.isPathfinder && positive.contains("include-pathfinder-society"),
@@ -142,6 +143,7 @@ case class CharacterData (
   partyDownload: Boolean,
   hideInventory: Boolean,
   moreClasses: Boolean,
+  skillsStyle: String,
   allKnowledge: Boolean,
   includeCharacterBackground: Boolean,
   isPathfinderSociety: Boolean,
@@ -161,4 +163,12 @@ case class CharacterData (
   def hasAnimalIconic = animalIconic != "generic" && animalIconic != "none" && !(animalIconic == "custom" && !customAnimalIconic.isDefined)
   def hasCustomLogo = customLogo.isDefined
   def iconic: Option[IconicImage] = IconicImage.get(inventoryIconic)
+
+  def makeEidolon(game: GameData): CharacterData = {
+    val eidolonClass = game.classByName("eidolon")
+
+    this.copy(
+      classes = eidolonClass.toList
+    )
+  }
 }
