@@ -25,7 +25,7 @@
         { "name": "Move Silently", "ability": "DEX", "useUntrained": true, "acp": true, "noRage": true },
         { "name": "Open Lock", "ability": "DEX", "noRage": true },
         { "name": "Ride", "ability": "DEX", "useUntrained": true },
-        { "name": "Search", "ability": "WIS", "useUntrained": true },
+        { "name": "Search", "ability": "INT", "useUntrained": true },
         { "name": "Sense Motive", "ability": "WIS", "useUntrained": true },
         { "name": "Sleight of Hand", "ability": "DEX", "acp": true, "noRage": true },
         { "name": "Spellcraft", "ability": "INT", "noRage": true },
