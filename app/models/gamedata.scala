@@ -4,11 +4,14 @@ import java.io.File
 import scala.io.Source
 // import com.novus.salat._
 // import com.novus.salat.global._
+import play.api.Play
 import play.api.libs.json._
 
 object GameData {
+  val dataPath = Play.current.configuration.getString("charactersheets.pdf.path").getOrElse("public/pdf/")+"data/"
+
   def load(game: String): GameData = {
-    val file = new File("public/data/"+game+".json")
+    val file = new File(dataPath+game+".json")
     val data = Source.fromFile(file)("UTF-8").getLines().mkString
     val json = Json.parse(data)
     parse(json)
@@ -21,6 +24,7 @@ object GameData {
       coreSkills = (json \ "coreSkills").as[List[String]],
       summarySkills = (json \ "summarySkills").as[List[String]],
       knowledgeSkills = (json \ "knowledgeSkills").as[List[String]],
+      animalSkills = (json \ "animalSkills").as[List[String]],
       pages = (json \ "pages").as[List[JsObject]].map(parsePage),
       gm = parseGM((json \ "gm").as[JsObject]),
       base = parseBaseData((json \ "base").as[JsObject]),
@@ -39,6 +43,9 @@ object GameData {
       subSkillOf = (json \ "subSkillOf").asOpt[String],
       optional = (json \ "optional").asOpt[Boolean].getOrElse(false),
       afterFold = (json \ "afterFold").asOpt[Boolean].getOrElse(false),
+      noRanks = (json \ "noRanks").asOpt[Boolean].getOrElse(false),
+      plusLevel = (json \ "plusLevel").asOpt[Boolean].getOrElse(false),
+      plusHalfLevel = (json \ "plusHalfLevel").asOpt[Boolean].getOrElse(false),
       noRage = (json \ "noRage").asOpt[Boolean].getOrElse(false),
       favouredEnemy = (json \ "favouredEnemy").asOpt[Boolean].getOrElse(false),
       favouredTerrain = (json \ "favouredTerrain").asOpt[Boolean].getOrElse(false)
@@ -111,6 +118,7 @@ case class GameData (
   coreSkills: List[String],
   summarySkills: List[String],
   knowledgeSkills: List[String],
+  animalSkills: List[String],
   pages: List[Page],
   gm: GM,
   base: BaseData,
@@ -229,6 +237,9 @@ case class Skill (
   subSkillOf: Option[String],
   optional: Boolean,
   afterFold: Boolean,
+  noRanks: Boolean,
+  plusLevel: Boolean,
+  plusHalfLevel: Boolean,
 
   noRage: Boolean,
   favouredEnemy: Boolean,

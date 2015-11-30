@@ -17,6 +17,8 @@ object Composer extends Controller {
   lazy val dnd35Data = Application.dnd35Data
   lazy val testData = Application.testData
 
+  val pdfPath: String = Play.current.configuration.getString("charactersheets.pdf.path").getOrElse("public/pdf/")
+
   def downloadPathfinder = downloadAction(pathfinderData)
   def downloadDnd35 = downloadAction(dnd35Data)
   def downloadTest = downloadAction(testData)
@@ -47,12 +49,12 @@ object Composer extends Controller {
 
     val bodydata = request.body.asFormUrlEncoded
     val data: Map[String, String] = bodydata.mapValues { _.head }
-    val sourceFolder = new File("public/pdf/"+gameData.game)
+    val sourceFolder = new File(pdfPath+"/"+gameData.game)
 
     val language = data.get("language").getOrElse("default")
     val sourceFolders = if (language != "default") {
       println("Language: "+language)
-      val langFolder = new File("public/pdf/languages/"+language+"/"+gameData.game)
+      val langFolder = new File(pdfPath+"languages/"+language+"/"+gameData.game)
       langFolder :: sourceFolder :: Nil
     } else
       sourceFolder :: Nil
@@ -160,6 +162,9 @@ object Composer extends Controller {
         writeCopyright(canvas, writer, gameData)
 
         if (page.slot == "party" || page.slot == "npc-group")
+          writeSkills(canvas, writer, page, gameData, None, language)
+
+        if (page.slot == "npc")
           writeSkills(canvas, writer, page, gameData, None, language)
 
         writeColourOverlay(canvas, gmdata.colour, pageSize)
@@ -295,6 +300,8 @@ object Composer extends Controller {
         writeSkills(canvas, writer, page, gameData, Some(character), language)
       if (page.slot == "eidolon")
         writeSkills(canvas, writer, page, gameData, Some(character.makeEidolon(gameData)), language)
+      if (page.slot == "animalcompanion")
+        writeSkills(canvas, writer, page, gameData, Some(character.makeAnimalCompanion(gameData)), language)
 
       // variant rules
       if (!character.variantRules.isEmpty) {
@@ -387,6 +394,12 @@ object Composer extends Controller {
 
       case "npc-group" =>
         gameData.summarySkills.flatMap(gameData.getSkill)
+
+      case "npc" =>
+        gameData.coreSkills.flatMap(gameData.getSkill)
+
+      case "animalcompanion" =>
+        gameData.animalSkills.flatMap(gameData.getSkill)
 
       case "eidolon" =>
         val eidolonClass = gameData.classByName("Eidolon")
@@ -502,7 +515,7 @@ object Composer extends Controller {
 
         canvas.setGState(defaultGstate)
 
-        if (!isSubSkill) {
+        if (!isSubSkill && !skill.noRanks) {
           if (gameData.isPathfinder) {
             writeCheckbox(classSkillMiddle, y, classSkills.contains(skill.name))
           } else if (gameData.isDnd35) {
@@ -517,14 +530,47 @@ object Composer extends Controller {
           }
         }
 
-        if (isSubSkill) {
-          canvas.setFontAndSize(attrFont, attrFontSize - 2)
-          canvas.setColorFill(attrColour)
-          canvas.setGState(fadedGState)
-          canvas.beginText
-          canvas.showTextAligned(Element.ALIGN_CENTER, "/", ranksMiddle, y + abilityOffset / 2, 0)
-          canvas.endText
-          canvas.setGState(defaultGstate)
+        if (isSubSkill || skill.noRanks) {
+          if (skill.plusLevel || skill.plusHalfLevel) {
+            canvas.setFontAndSize(attrFont, attrFontSize)
+            canvas.setColorFill(stdColour)
+            canvas.setGState(defaultGstate)
+            canvas.beginText
+            canvas.showTextAligned(Element.ALIGN_CENTER, "+", classSkillMiddle + 2.4f, y - 2f, 0)
+            canvas.endText
+
+            canvas.setFontAndSize(skillFont, 6f)
+            canvas.setColorFill(attrColour)
+            canvas.setGState(fadedGState)
+            var x = ranksMiddle - 1.2f
+            val level = translate("Level").getOrElse("Level")
+            for ( char <- character; (cls, i) <- char.classes.zipWithIndex; if cls.skills.contains(skill.name) ) {
+              val className = translate(cls.name).getOrElse(cls.name).replaceAll(" *\\(.*\\)$", "")
+              canvas.beginText
+              canvas.showTextAligned(Element.ALIGN_CENTER, className, x, y + 2.5f, 0)
+              canvas.showTextAligned(Element.ALIGN_CENTER, level, x, y - 2.5f, 0)
+              canvas.endText
+              x += 27f
+            }
+
+            if (skill.plusHalfLevel) {
+              canvas.setFontAndSize(attrFont, attrFontSize)
+              canvas.setColorFill(stdColour)
+              canvas.setGState(defaultGstate)
+              canvas.beginText
+              canvas.showTextAligned(Element.ALIGN_CENTER, "÷ 2", x, y - 2f, 0)
+              canvas.endText
+            }
+
+          } else {
+            canvas.setFontAndSize(attrFont, attrFontSize - 2)
+            canvas.setColorFill(attrColour)
+            canvas.setGState(fadedGState)
+            canvas.beginText
+            canvas.showTextAligned(Element.ALIGN_CENTER, "/", ranksMiddle, y + abilityOffset / 2, 0)
+            canvas.endText
+            canvas.setGState(defaultGstate)
+          }
         }
 
         if (page.slot == "core" && skill.acp) {
@@ -581,6 +627,7 @@ object Composer extends Controller {
             canvas.circle(favouredEnemyMiddle, y + 2, 4.5f)
             canvas.setLineWidth(1.2f)
             canvas.stroke()
+
           }
         }
 
@@ -670,6 +717,34 @@ object Composer extends Controller {
       val lineIncrement = -13.55f
       val skillsAreaLeft = 28f
       val skillsAreaRight = if (page.variant == "10") 39.5f else 40f
+
+      val skillNameLeft = skillsAreaLeft + 2f
+      val skillNameIndent = 16f
+
+      val numSlots = 0
+
+      SkillLayout(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+        skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
+
+    case "animalcompanion" =>
+      val firstLine = 469f
+      val lineIncrement = -15f
+      val skillsAreaLeft = 189f
+      val skillsAreaRight = 300f
+
+      val skillNameLeft = skillsAreaLeft + 2f
+      val skillNameIndent = 16f
+
+      val numSlots = 0
+
+      SkillLayout(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+        skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
+
+    case "npc" =>
+      val firstLine = 512f
+      val lineIncrement = -13.7f
+      val skillsAreaLeft = 189f
+      val skillsAreaRight = 300f
 
       val skillNameLeft = skillsAreaLeft + 2f
       val skillNameIndent = 16f

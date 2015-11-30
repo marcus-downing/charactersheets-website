@@ -2,15 +2,17 @@ package models
 
 import java.io.File
 import scala.io.Source
+import play.api.Play
 import play.api.libs.json._
 
 object TranslationData {
 	lazy val translations = load()
+  	val dataPath = Play.current.configuration.getString("charactersheets.pdf.path").getOrElse("public/pdf/")+"data/"
 
 	def apply(language: String) = translations.get(language).getOrElse(TranslationLanguage("", Nil))
 
 	def load(): TranslationData = {
-    val file = new File("public/data/translations.json")
+    val file = new File(dataPath+"translations.json")
     val data = Source.fromFile(file)("UTF-8").getLines().mkString
     val json = Json.parse(data)
     parse(json)

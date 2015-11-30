@@ -171,4 +171,18 @@ case class CharacterData (
       classes = eidolonClass.toList
     )
   }
+
+  def makeAnimalCompanion(game: GameData): CharacterData = {
+    val animalClass = BaseClass("Animal Companion", Nil, game.animalSkills)
+    this.copy(
+      classes = List(animalClass)
+    )
+  }
+
+  def makeNPC(game: GameData): CharacterData = {
+    val npcClass = BaseClass("NPC", Nil, game.coreSkills)
+    this.copy(
+      classes = List(npcClass)
+    )
+  }
 }
