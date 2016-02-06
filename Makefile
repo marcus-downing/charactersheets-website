@@ -3,7 +3,8 @@ all:
 
 run:
 	killall -9 java
-	target/universal
+	rm target/universal/stage/RUNNING_PID
+	(target/universal/stage/bin/character-sheets-new-website > logs/application.log &)
 
 log:
 	tailf logs/application.log
