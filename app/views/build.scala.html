@@ -172,10 +172,18 @@
 
         <h3>Skills</h3>
         <p><label for="skills-style">Skills list style</label>
-          <select name="skills-list-style" id="skills-list-style">
-              <option name="normal" selected>Normal</option>
-              <option name="blank">Blank</option>
-          </select></p>
+              <label for="skills-list-style-normal">
+                <input type="radio" name="skills-list-style" value="normal" id="skills-list-style-normal" checked>
+                Normal</label> &nbsp; 
+              @if(gameData.isPathfinder) {
+              <label for="skills-list-style-consolidated">
+                <input type="radio" name="skills-list-style" value="consolidated" id="skills-list-style-consolidated"> 
+                Consolidated</label> &nbsp; 
+              }
+              <label for="skills-list-style-blank">
+                <input type="radio" name="skills-list-style" value="blank" id="skills-list-style-blank"> 
+                Blank</label>
+          </p>
 
           <p><label for="all-knowledge"><input type="checkbox" name="all-knowledge" id="all-knowledge" /> Include all knowledge skills</label></p>
           <p class='info'>This reduces the space available for Craft, Profession and Perform skills. Bards get all knowledge skills anyway.</p>

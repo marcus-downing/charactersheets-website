@@ -111,6 +111,7 @@ object Composer extends Controller {
       case Some("all") =>
         println("Party...")
         val character = CharacterData.parse(data, gameData, customIconic, None, customLogo)
+          .copy(allKnowledge = true)
         val pdf = composeAll(character, gameData, sourceFolders, language)
         Ok(pdf).as("application/pdf").withHeaders(
           "Content-disposition" -> ("attachment; filename=\""+gameData.name+".pdf\"")
@@ -384,11 +385,14 @@ object Composer extends Controller {
   }
 
   //  1mm = 2.8pt
-  def writeSkills(canvas: PdfContentByte, writer: PdfWriter, page: Page,  gameData: GameData, character: Option[CharacterData], language: String) {
+  def pickSkills(page: Page, gameData: GameData, character: Option[CharacterData], translate: TranslationLanguage): (List[Skill], List[String], Map[String, List[Skill]]) = {
+    val skillsStyle = character.map(_.skillsStyle).getOrElse("normal")
+    if (skillsStyle == "blank") return (Nil, Nil, Map.empty)
+
     var classSkills: List[String] = character.map(_.classes.flatMap(_.skills).distinct).getOrElse(Nil)
     val bonusSkills = if (isAprilFool) "Knowledge (aeronautics)" :: Nil else Nil
 
-    val skills: List[Skill] = page.slot match {
+    var skills: List[Skill] = page.slot match {
       case "party" =>
         gameData.summarySkills.flatMap(gameData.getSkill)
 
@@ -418,18 +422,45 @@ object Composer extends Controller {
         (gameData.coreSkills ::: classSkills ::: knowledgeSkills ::: bonusSkills).distinct.flatMap(gameData.getSkill)
     }
 
+    if (skillsStyle == "consolidated" && !gameData.consolidatedSkills.isEmpty) {
+      skills = skills.flatMap { skill =>
+        if (gameData.consolidatedSkills.contains(skill.name)) {
+          gameData.consolidatedSkills(skill.name).flatMap{ as => 
+            gameData.skills.filter(_.name == as)
+          }
+        } else {
+          skill :: Nil
+        }
+      }.map { skill =>
+        if (skill.subSkillOf.isDefined) {
+          skill.subSkillOf match {
+            case Some(parent) if gameData.consolidatedSkills.contains(parent) =>
+              val as = gameData.consolidatedSkills(parent).head
+              skill.copy(subSkillOf = Some(as))
+            case _ => skill
+          }
+        } else skill
+      }.distinct
+    }
+
     // translate skill names before sorting them
-    val translate = TranslationData(language)
-    val displaySkills: List[Skill] = skills.map { s => 
-      val name = s.displayName.getOrElse(s.name)
+    skills = skills.map { s => 
+      val name = s.skillName
       s.copy(displayName = Some(translate(name).getOrElse(name)))
     }
 
-    println("Writing skills: "+displaySkills.map(_.name))
-    val (afterFold, beforeFold) = displaySkills.filter(!_.isSubSkill).partition(_.afterFold)
-    val skillsToWrite = beforeFold.sortBy(_.skillName) ::: afterFold.sortBy(_.skillName)
+    // println("Writing skills: "+skills.map(_.name))
+    val (afterFold, beforeFold) = skills.filter(!_.isSubSkill).partition(_.afterFold)
+    val topSkills = beforeFold.sortBy(_.skillName) ::: afterFold.sortBy(_.skillName)
 
-    val subskillsBySkill: Map[String, List[Skill]] = displaySkills.filter(_.isSubSkill).groupBy(_.subSkillOf.getOrElse(""))
+    val subskillsBySkill: Map[String, List[Skill]] = skills.filter(_.isSubSkill).groupBy(_.subSkillOf.getOrElse(""))
+
+    (topSkills, classSkills, subskillsBySkill)
+  }
+
+  def writeSkills(canvas: PdfContentByte, writer: PdfWriter, page: Page,  gameData: GameData, character: Option[CharacterData], language: String) {
+    val translate = TranslationData(language)
+    val (skillsToWrite, classSkills, subskillsBySkill) = pickSkills(page, gameData, character, translate)
 
     //  set values up
     val skillFont = textFont
@@ -661,7 +692,7 @@ object Composer extends Controller {
           }
         } else if (gameData.isDnd35) {
           if (skill.name == "Intimidate") annotateSkill("+", "size", "diff x4")
-          if (skill.name == "Hide") annotateSkill("-", "size", "mod x4")
+          if (skill.name == "Hide") annotateSkill("+", "size", "mod x4")
           if (skill.name == "Swim") annotateSkill("-1", "per 5lb", "carried")
         }
       }
@@ -856,7 +887,7 @@ object Composer extends Controller {
 
       val firstLine: Float = 
         if (isSimple) 615f
-        else if (isMore) 500f 
+        else if (isMore) 588f 
         else 616f
       val lineIncrement = -13.51f
       val lineBottomOffset = -4.5f
@@ -867,32 +898,30 @@ object Composer extends Controller {
 
       val skillNameLeft = skillsAreaLeft + 2f
       val skillNameIndent = 16f
-      val abilityMiddle = 383f
-        // if (isBarbarian) 395f 
-        // else if (isRanger) 388f
-        // else 383f
+      val abilityMiddle =
+        if (isMore) 370f
+        else 383f
       val abilityOffset = -1f
 
-      val ranksMiddle = 465f
-        // if (isBarbarian) 448f
-        // else if (isRanger) 443f
-        // else 465f
+      val ranksMiddle =
+        if (isMore) 455f
+        else 465f
 
-      val useUntrainedMiddle = 330f
-        // if (isBarbarian) 320f
-        // else if (isRanger) 310f
-        // else 330f
-      val classSkillMiddle = 397.7f
-        // if (isBarbarian) 370f
-        // else if (isRanger) 370f
-        // else 397.7f
+      val useUntrainedMiddle =
+        if (isMore) 317f
+        else 330f
+      val classSkillMiddle =
+        if (isMore) 384f
+        else 397.7f
       val classSkillIncrement = 8f
 
       val rageMiddle = 524f
       val favouredEnemyMiddle = 524f
       val acpWidth = 25f
 
-      val numSlots = 43
+      val numSlots = 
+        if (isMore) 42
+        else 44
 
       SkillLayout(firstLine, lineIncrement, lineBottomOffset, lineBoxHeight, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, abilityMiddle, abilityOffset, ranksMiddle,
@@ -1236,6 +1265,15 @@ object Composer extends Controller {
 
       //  copyright notice
       writeCopyright(canvas, writer, gameData)
+
+      // skills
+      if (page.slot == "core")
+        writeSkills(canvas, writer, page, gameData, Some(character), language)
+      if (page.slot == "eidolon")
+        writeSkills(canvas, writer, page, gameData, Some(character.makeEidolon(gameData)), language)
+      if (page.slot == "animalcompanion")
+        writeSkills(canvas, writer, page, gameData, Some(character.makeAnimalCompanion(gameData)), language)
+
 
       //  generic image
       writeIconic(canvas, writer, page.slot, "public/images/iconics/generic.png", None, character)
