@@ -8,3 +8,10 @@ run:
 
 log:
 	tailf logs/application.log
+
+help:
+	@echo
+	@echo "  make        Build the application"
+	@echo "  make run    Run the application"
+	@echo "  make log    Show the application logs"
+	@echo
