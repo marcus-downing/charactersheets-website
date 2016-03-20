@@ -414,12 +414,13 @@ object Composer extends Controller {
 
       case _ =>
         val knowledgeSkills = if (character.map(_.allKnowledge).getOrElse(false)) gameData.knowledgeSkills else Nil
+        val performSkill = character.map(_.performSkill.toList).getOrElse(Nil)
         // println("Core skills: "+coreSkills.mkString(", "))
         // println("Class skills: "+classSkills.mkString(", "))
         if (knowledgeSkills != Nil) println("Knowledge skills: "+knowledgeSkills.mkString(", "))
         if (bonusSkills != Nil) println("Bonus skills: "+bonusSkills.mkString(", "))
 
-        (gameData.coreSkills ::: classSkills ::: knowledgeSkills ::: bonusSkills).distinct.flatMap(gameData.getSkill)
+        (gameData.coreSkills ::: classSkills ::: knowledgeSkills ::: performSkill ::: bonusSkills).distinct.flatMap(gameData.getSkill)
     }
 
     if (skillsStyle == "consolidated" && !gameData.consolidatedSkills.isEmpty) {
@@ -556,7 +557,8 @@ object Composer extends Controller {
             }
 
             for ( char <- character; (cls, i) <- char.classes.zipWithIndex) {
-              writeCheckbox(classSkillMiddle + classSkillIncrement * i, y, cls.skills.contains(skill.name))
+              if (i < nmax)
+                writeCheckbox(classSkillMiddle + classSkillIncrement * i, y, cls.skills.contains(skill.name))
             }
           }
         }
@@ -664,8 +666,11 @@ object Composer extends Controller {
 
         def annotateSkill(sigil: String, line1: String, line2: String) {
           val sigilr =
-            if (skill.acp) skillsAreaRight - acpWidth * 2
-            else skillsAreaRight - acpWidth + 3f
+            if (skill.acp) {
+              if (skill.noRage && page.variant == Some("barbarian"))
+                   skillsAreaRight - acpWidth * 3
+              else skillsAreaRight - acpWidth * 2
+            } else skillsAreaRight - acpWidth + 3f
           val linesl = sigilr + 2f
 
           canvas.beginText
@@ -748,27 +753,29 @@ object Composer extends Controller {
       val lineIncrement = -13.55f
       val skillsAreaLeft = 28f
       val skillsAreaRight = if (page.variant == "10") 39.5f else 40f
+      val lineBottomOffset = -4.5f
 
       val skillNameLeft = skillsAreaLeft + 2f
       val skillNameIndent = 16f
 
       val numSlots = 0
 
-      SkillLayout(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+      SkillLayout(firstLine, lineIncrement, lineBottomOffset, 0, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
 
     case "animalcompanion" =>
-      val firstLine = 469f
+      val firstLine = if (gameData.isPathfinder) 469f else 445f
       val lineIncrement = -15f
       val skillsAreaLeft = 189f
       val skillsAreaRight = 300f
+      val lineBottomOffset = -4.5f
 
       val skillNameLeft = skillsAreaLeft + 2f
       val skillNameIndent = 16f
 
       val numSlots = 0
 
-      SkillLayout(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+      SkillLayout(firstLine, lineIncrement, lineBottomOffset, 0, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
 
     case "npc" =>
@@ -776,13 +783,14 @@ object Composer extends Controller {
       val lineIncrement = -13.7f
       val skillsAreaLeft = 189f
       val skillsAreaRight = 300f
+      val lineBottomOffset = -4.5f
 
       val skillNameLeft = skillsAreaLeft + 2f
       val skillNameIndent = 16f
 
       val numSlots = 0
 
-      SkillLayout(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+      SkillLayout(firstLine, lineIncrement, lineBottomOffset, 0, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
 
     case "npc-group" =>
@@ -790,13 +798,14 @@ object Composer extends Controller {
       val lineIncrement = -13.55f
       val skillsAreaLeft = 28f
       val skillsAreaRight = 40f
+      val lineBottomOffset = -4.5f
 
       val skillNameLeft = skillsAreaLeft + 2f
       val skillNameIndent = 16f
 
       val numSlots = 0
 
-      SkillLayout(firstLine, lineIncrement, 0, 0, skillsAreaLeft, skillsAreaRight, 
+      SkillLayout(firstLine, lineIncrement, lineBottomOffset, 0, skillsAreaLeft, skillsAreaRight, 
         skillNameLeft, skillNameIndent, 0, 0, 0, 0, 0, 0, 0, numSlots, 0, 0)
 
     case "eidolon" =>
@@ -982,6 +991,12 @@ object Composer extends Controller {
             val awtImage = java.awt.Toolkit.getDefaultToolkit().createImage(imgFilename)
             val img = Image.getInstance(awtImage, null)
 
+            // initiative marker
+            img.scaleToFit(36f, 36f)
+            img.setRotationDegrees(0)
+            img.setAbsolutePosition(410.5f - (img.getScaledWidth() / 2), 716f - (img.getScaledHeight() / 2))
+            canvas.addImage(img)
+
             // stat tracker
             img.scaleToFit(140f,150f)
             img.setRotationDegrees(180)
@@ -992,15 +1007,17 @@ object Composer extends Controller {
               case "small" => 
                 // stand-up figure
                 img.scaleToFit(48f, 62f)
-                img.setAbsolutePosition(335.6f - (img.getScaledWidth() / 2), 726 - (img.getScaledHeight() / 2))
+                img.setRotationDegrees(180)
+                img.setAbsolutePosition(294f - (img.getScaledWidth() / 2), 726 - (img.getScaledHeight() / 2))
                 canvas.addImage(img)
 
                 img.setRotationDegrees(0)
-                img.setAbsolutePosition(335.6f - (img.getScaledWidth() / 2), 656f - (img.getScaledHeight() / 2))
+                img.setAbsolutePosition(294f - (img.getScaledWidth() / 2), 656f - (img.getScaledHeight() / 2))
                 canvas.addImage(img)
 
                 // square token
                 img.scaleToFit(48f, 48f)
+                img.setRotationDegrees(0)
                 img.setAbsolutePosition(514.5f - (img.getScaledWidth() / 2), 127f - (img.getScaledHeight() / 2))
                 canvas.addImage(img)
 
@@ -1011,15 +1028,17 @@ object Composer extends Controller {
               case "medium" =>
                 // stand-up figure
                 img.scaleToFit(66f, 89f)
-                img.setAbsolutePosition(335.6f - (img.getScaledWidth() / 2), 714 - (img.getScaledHeight() / 2))
+                img.setRotationDegrees(180)
+                img.setAbsolutePosition(295f - (img.getScaledWidth() / 2), 714 - (img.getScaledHeight() / 2))
                 canvas.addImage(img)
 
                 img.setRotationDegrees(0)
-                img.setAbsolutePosition(335.6f - (img.getScaledWidth() / 2), 620f - (img.getScaledHeight() / 2))
+                img.setAbsolutePosition(295f - (img.getScaledWidth() / 2), 620f - (img.getScaledHeight() / 2))
                 canvas.addImage(img)
 
                 // square token
                 img.scaleToFit(66f, 66f)
+                img.setRotationDegrees(0)
                 img.setAbsolutePosition(514.5f - (img.getScaledWidth() / 2), 126f - (img.getScaledHeight() / 2))
                 canvas.addImage(img)
 
@@ -1030,6 +1049,7 @@ object Composer extends Controller {
               case "large" =>
                 // stand-up figure
                 img.scaleToFit(135f, 180f)
+                img.setRotationDegrees(180)
                 img.setAbsolutePosition(294f - (img.getScaledWidth() / 2), 632 - (img.getScaledHeight() / 2))
                 canvas.addImage(img)
 
@@ -1039,6 +1059,7 @@ object Composer extends Controller {
 
                 // square token
                 img.scaleToFit(135f, 135f)
+                img.setRotationDegrees(0)
                 img.setAbsolutePosition(475f - (img.getScaledWidth() / 2), 220f - (img.getScaledHeight() / 2))
                 canvas.addImage(img)
 

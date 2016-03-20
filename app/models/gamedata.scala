@@ -140,7 +140,11 @@ case class GameData (
   def slugOf(str: String) = str.toLowerCase.replaceAll("[^a-z]+", " ").trim.replace(" ", "-")
 
   def getSkill(name: String): Option[Skill] = {
-    val skill = skills.filter(_.name == name).headOption
+    var skill = skills.filter(_.name == name).headOption
+    if (skill == None && name.startsWith("Perform")) {
+      println("Making performance: "+name)
+      skill = Some(Skill.makePerform(name))
+    }
     if (skill == None) println(" * Unknown skill: "+name+"!")
     skill
   }
@@ -249,4 +253,20 @@ case class Skill (
 ) {
   def isSubSkill = subSkillOf != None
   def skillName = displayName.getOrElse(name)
+}
+
+object Skill {
+  def makePerform(name: String): Skill = Skill(name, Some(name), "CHA",
+    useUntrained = true,
+    acp = false,
+    subSkillOf = None,
+    optional = false,
+    afterFold = true,
+    noRanks = false,
+    plusLevel = false,
+    plusHalfLevel = false,
+    noRage = true,
+    favouredEnemy = false,
+    favouredTerrain = false
+  )
 }
