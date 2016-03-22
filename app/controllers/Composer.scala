@@ -537,7 +537,7 @@ object Composer extends Controller {
           writeCheckbox(useUntrainedMiddle, y, true)
         }
 
-        val ability = if (skill.ability.length > 0) translate(skill.ability).getOrElse(skill.ability) else "/"
+        val ability = if (skill.ability.length > 0) translate(skill.ability).getOrElse(skill.ability) else ""
         canvas.setFontAndSize(attrFont, attrFontSize)
         canvas.setColorFill(attrColour)
         canvas.setGState(fadedGState)
@@ -563,47 +563,98 @@ object Composer extends Controller {
           }
         }
 
+        // work out if the skill gets level bonuses
+        var plusHalfLevelClasses: List[GameClass] = Nil
+        var plusLevelClasses: List[GameClass] = Nil
+
         if (isSubSkill || skill.noRanks) {
-          if (skill.plusLevel || skill.plusHalfLevel) {
-            canvas.setFontAndSize(attrFont, attrFontSize)
-            canvas.setColorFill(stdColour)
-            canvas.setGState(defaultGstate)
+          if (skill.plusLevel) {
+            plusLevelClasses = character.toList.flatMap(_.classes).filter(_.skills.contains(skill.name))
+          } else if (skill.plusHalfLevel) {
+            plusHalfLevelClasses = character.toList.flatMap(_.classes).filter(_.skills.contains(skill.name))
+          }
+        }
+
+        for ( char <- character.toList; cls <- char.classes; if cls.plusHalfLevel.contains(skill.name) ) {
+          plusHalfLevelClasses = cls :: plusHalfLevelClasses
+        }
+
+        var plusLevelX = 
+          if (isSubSkill) abilityMiddle - 6f
+          else if (skill.noRanks) classSkillMiddle + 2.5f
+          else ranksMiddle + 12f
+
+        // write level bonuses
+        // println(skill.skillName+" plus half level classes: "+plusHalfLevelClasses.map(_.name).mkString(", "))
+        // println(skill.skillName+" plus level classes: "+plusHalfLevelClasses.map(_.name).mkString(", "))
+        if (!plusLevelClasses.isEmpty || !plusHalfLevelClasses.isEmpty) {
+          canvas.setFontAndSize(attrFont, attrFontSize)
+          canvas.setColorFill(stdColour)
+          canvas.setGState(defaultGstate)
+          canvas.beginText
+          canvas.showTextAligned(Element.ALIGN_CENTER, "+", plusLevelX, y - 2f, 0)
+          canvas.endText
+          plusLevelX += 20f
+
+          if (!plusHalfLevelClasses.isEmpty) {
+            plusLevelX -= 12f
+            canvas.setFontAndSize(textFont, attrFontSize)
             canvas.beginText
-            canvas.showTextAligned(Element.ALIGN_CENTER, "+", classSkillMiddle + 2.4f, y - 2f, 0)
+            canvas.showTextAligned(Element.ALIGN_CENTER, "(", plusLevelX, y - 2f, 0)
             canvas.endText
+            plusLevelX += 17f
 
             canvas.setFontAndSize(skillFont, 6f)
             canvas.setColorFill(attrColour)
             canvas.setGState(fadedGState)
-            var x = ranksMiddle - 1.2f
             val level = translate("Level").getOrElse("Level")
-            for ( char <- character; (cls, i) <- char.classes.zipWithIndex; if cls.skills.contains(skill.name) ) {
-              val className = translate(cls.name).getOrElse(cls.name).replaceAll(" *\\(.*\\)$", "")
+            for ( cls <- plusHalfLevelClasses ) {
+              val className = translate(cls.shortName).getOrElse(cls.shortName)
               canvas.beginText
-              canvas.showTextAligned(Element.ALIGN_CENTER, className, x, y + 2.5f, 0)
-              canvas.showTextAligned(Element.ALIGN_CENTER, level, x, y - 2.5f, 0)
+              canvas.showTextAligned(Element.ALIGN_CENTER, className, plusLevelX, y + 2.5f, 0)
+              canvas.showTextAligned(Element.ALIGN_CENTER, level, plusLevelX, y - 2.5f, 0)
               canvas.endText
-              x += 27f
+              plusLevelX += 26f
             }
 
-            if (skill.plusHalfLevel) {
-              canvas.setFontAndSize(attrFont, attrFontSize)
-              canvas.setColorFill(stdColour)
-              canvas.setGState(defaultGstate)
-              canvas.beginText
-              canvas.showTextAligned(Element.ALIGN_CENTER, "÷ 2", x, y - 2f, 0)
-              canvas.endText
-            }
+            plusLevelX -= 2f
+            canvas.setFontAndSize(attrFont, attrFontSize)
+            canvas.setColorFill(stdColour)
+            canvas.setGState(defaultGstate)
+            canvas.beginText
+            canvas.showTextAligned(Element.ALIGN_CENTER, "÷ 2", plusLevelX, y - 2f, 0)
+            canvas.endText
+            plusLevelX += 11f
 
-          } else {
-            canvas.setFontAndSize(attrFont, attrFontSize - 2)
+            canvas.setFontAndSize(textFont, attrFontSize)
+            canvas.beginText
+            canvas.showTextAligned(Element.ALIGN_CENTER, ")", plusLevelX, y - 2f, 0)
+            canvas.endText
+            plusLevelX += 20f
+          }
+
+          if (!plusLevelClasses.isEmpty) {
+            canvas.setFontAndSize(skillFont, 6f)
             canvas.setColorFill(attrColour)
             canvas.setGState(fadedGState)
-            canvas.beginText
-            canvas.showTextAligned(Element.ALIGN_CENTER, "/", ranksMiddle, y + abilityOffset / 2, 0)
-            canvas.endText
-            canvas.setGState(defaultGstate)
+            val level = translate("Level").getOrElse("Level")
+            for ( cls <- plusLevelClasses ) {
+              val className = translate(cls.shortName).getOrElse(cls.shortName)
+              canvas.beginText
+              canvas.showTextAligned(Element.ALIGN_CENTER, className, plusLevelX, y + 2.5f, 0)
+              canvas.showTextAligned(Element.ALIGN_CENTER, level, plusLevelX, y - 2.5f, 0)
+              canvas.endText
+              plusLevelX += 26f
+            }
           }
+        } else if (isSubSkill || skill.noRanks) {
+          canvas.setFontAndSize(attrFont, attrFontSize - 2)
+          canvas.setColorFill(attrColour)
+          canvas.setGState(fadedGState)
+          canvas.beginText
+          canvas.showTextAligned(Element.ALIGN_CENTER, "/", ranksMiddle, y + abilityOffset / 2, 0)
+          canvas.endText
+          canvas.setGState(defaultGstate)
         }
 
         if (page.slot == "core" && skill.acp) {

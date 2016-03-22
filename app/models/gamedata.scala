@@ -101,7 +101,8 @@ object GameData {
     pages = (json \ "pages").as[List[String]],
     variants = (json \ "variants").asOpt[List[JsObject]].getOrElse(Nil).map(parseVariant),
     axes = (json \ "axes").asOpt[List[List[String]]].getOrElse(Nil),
-    skills = (json \ "skills").asOpt[List[String]].getOrElse(Nil)
+    skills = (json \ "skills").asOpt[List[String]].getOrElse(Nil),
+    plusHalfLevel = (json \ "plusHalfLevel").asOpt[List[String]].getOrElse(Nil)
   )
 
   def parseVariant(json: JsObject) = VariantClass(
@@ -197,15 +198,18 @@ case class Book (
 
 trait GameClass {
   def name: String
+  def shortName = name.replaceAll("^Unchained *", "").replaceAll(" *\\(.*\\)$", "")
   def pages: List[String]
   def code = name.replaceAll("[^a-zA-Z]+", "-")
   def skills: List[String]
+  def plusHalfLevel: List[String]
 }
 
 case class BaseClass (
   name: String,
   pages: List[String],
   skills: List[String] = Nil,
+  plusHalfLevel: List[String] = Nil,
   variants: List[VariantClass] = Nil,
   axes: List[List[String]] = Nil
 ) extends GameClass {
@@ -221,7 +225,8 @@ case class VariantClass (
   name: String,
   pages: List[String],
   axes: List[String] = Nil,
-  skills: List[String] = Nil
+  skills: List[String] = Nil,
+  plusHalfLevel: List[String] = Nil
 ) extends GameClass {
   def mergeInto(base: BaseClass) = new BaseClass(name, base.pages ::: pages, base.skills ::: skills)
 }
