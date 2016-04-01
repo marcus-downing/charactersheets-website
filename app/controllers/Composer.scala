@@ -579,10 +579,10 @@ object Composer extends Controller {
           plusHalfLevelClasses = cls :: plusHalfLevelClasses
         }
 
-        var plusLevelX = 
-          if (isSubSkill) abilityMiddle - 6f
-          else if (skill.noRanks) classSkillMiddle + 2.5f
-          else ranksMiddle + 12f
+        var (plusLevelPlusX, plusLevelX) = 
+          if (isSubSkill) (abilityMiddle - 6f, abilityMiddle + 14f)
+          else if (skill.noRanks) (classSkillMiddle + 2.5f, ranksMiddle - 1.5f)
+          else (ranksMiddle + 12f, ranksMiddle + 32f)
 
         // write level bonuses
         // println(skill.skillName+" plus half level classes: "+plusHalfLevelClasses.map(_.name).mkString(", "))
@@ -592,9 +592,8 @@ object Composer extends Controller {
           canvas.setColorFill(stdColour)
           canvas.setGState(defaultGstate)
           canvas.beginText
-          canvas.showTextAligned(Element.ALIGN_CENTER, "+", plusLevelX, y - 2f, 0)
+          canvas.showTextAligned(Element.ALIGN_CENTER, "+", plusLevelPlusX, y - 2f, 0)
           canvas.endText
-          plusLevelX += 20f
 
           if (!plusHalfLevelClasses.isEmpty) {
             plusLevelX -= 12f
