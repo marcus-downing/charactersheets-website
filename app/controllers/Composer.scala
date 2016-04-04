@@ -160,7 +160,7 @@ object Composer extends Controller {
 
         //  the page
         canvas.addTemplate(template, 0, 0)
-        writeCopyright(canvas, writer, gameData)
+        writeCopyright(canvas, writer, gameData, page)
 
         if (page.slot == "party" || page.slot == "npc-group")
           writeSkills(canvas, writer, page, gameData, None, language)
@@ -290,7 +290,7 @@ object Composer extends Controller {
       canvas.addTemplate(template, 0, 0)
 
       //  copyright notice
-      writeCopyright(canvas, writer, gameData)
+      writeCopyright(canvas, writer, gameData, page)
 
       //  generic image
       if (!character.hasCustomIconic && !character.iconic.isDefined && !isAprilFool)
@@ -358,7 +358,7 @@ object Composer extends Controller {
     }
   }
 
-  def writeCopyright(canvas: PdfContentByte, writer: PdfWriter, gameData: GameData) {
+  def writeCopyright(canvas: PdfContentByte, writer: PdfWriter, gameData: GameData, page: Page) {
     val year = new org.joda.time.LocalDate().getYear()
 
     //  copyright notice
@@ -372,13 +372,26 @@ object Composer extends Controller {
     canvas.showTextAligned(Element.ALIGN_LEFT, "\u00A9 Marcus Downing "+year+"        http://charactersheets.minotaur.cc", 30, 22, 0)
     canvas.setFontAndSize(font, 4.5f)
 
-    if (gameData.isPathfinder) {
-      canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet uses trademarks and/or copyrights owned by Paizo Publishing, LLC, which are used under Paizo's Community Use Policy. We are expressly prohibited from charging you to use or access this content.", 180, 22, 0)
-      canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet is not published, endorsed, or specifically approved by Paizo Publishing. For more information about Paizo's Community Use Policy, please visit paizo.com/communityuse. For more information about Paizo Publishing and Paizo products, please visit paizo.com.", 30, 17, 0)
-    } else if (gameData.isDnd35) {
-      canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC. This character sheet may use the trademarks and other intellectual property of", 180, 22, 0)
-      canvas.showTextAligned(Element.ALIGN_LEFT, "Wizards of the Coast LLC, which is permitted under Wizards' Fan Site Policy. For example, DUNGEONS & DRAGONS®, D&D®, PLAYER'S HANDBOOK 2®, and DUNGEON MASTER'S GUIDE® are trademark[s] of Wizards of the Coast and D&D® core rules, game mechanics, characters and their", 30, 17, 0)
-      canvas.showTextAligned(Element.ALIGN_LEFT, "distinctive likenesses are the property of the Wizards of the Coast. For more information about Wizards of the Coast or any of Wizards' trademarks or other intellectual property, please visit their website.", 30, 12, 0)
+    if (page.a5) {
+      if (gameData.isPathfinder) {
+        canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet uses trademarks and/or copyrights owned by Paizo Publishing, LLC, which are used under Paizo's", 180, 22, 0)
+        canvas.showTextAligned(Element.ALIGN_LEFT, "Community Use Policy. We are expressly prohibited from charging you to use or access this content. This character sheet is not published, endorsed, or specifically approved by Paizo Publishing.", 30, 17, 0)
+        canvas.showTextAligned(Element.ALIGN_LEFT, "For more information about Paizo's Community Use Policy, please visit paizo.com/communityuse. For more information about Paizo Publishing and Paizo products, please visit paizo.com.", 30, 12, 0)
+      } else {
+        canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC. ", 180, 22, 0)
+        canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet may use the trademarks and other intellectual property of Wizards of the Coast LLC, which is permitted under Wizards' Fan Site Policy. For example, DUNGEONS & DRAGONS®, D&D®,", 30, 17, 0)
+        canvas.showTextAligned(Element.ALIGN_LEFT, "PLAYER'S HANDBOOK 2®, and DUNGEON MASTER'S GUIDE® are trademark[s] of Wizards of the Coast and D&D® core rules, game mechanics, characters and their distinctive likenesses are the property of", 30, 12, 0)
+        canvas.showTextAligned(Element.ALIGN_LEFT, "the Wizards of the Coast. For more information about Wizards of the Coast or any of Wizards' trademarks or other intellectual property, please visit their website.", 30, 7, 0)
+      }
+    } else {
+      if (gameData.isPathfinder) {
+        canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet uses trademarks and/or copyrights owned by Paizo Publishing, LLC, which are used under Paizo's Community Use Policy. We are expressly prohibited from charging you to use or access this content.", 180, 22, 0)
+        canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet is not published, endorsed, or specifically approved by Paizo Publishing. For more information about Paizo's Community Use Policy, please visit paizo.com/communityuse. For more information about Paizo Publishing and Paizo products, please visit paizo.com.", 30, 17, 0)
+      } else if (gameData.isDnd35) {
+        canvas.showTextAligned(Element.ALIGN_LEFT, "This character sheet is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC. This character sheet may use the trademarks and other intellectual property of", 180, 22, 0)
+        canvas.showTextAligned(Element.ALIGN_LEFT, "Wizards of the Coast LLC, which is permitted under Wizards' Fan Site Policy. For example, DUNGEONS & DRAGONS®, D&D®, PLAYER'S HANDBOOK 2®, and DUNGEON MASTER'S GUIDE® are trademark[s] of Wizards of the Coast and D&D® core rules, game mechanics, characters and their", 30, 17, 0)
+        canvas.showTextAligned(Element.ALIGN_LEFT, "distinctive likenesses are the property of the Wizards of the Coast. For more information about Wizards of the Coast or any of Wizards' trademarks or other intellectual property, please visit their website.", 30, 12, 0)
+      }
     }
     canvas.endLayer
     canvas.endText
@@ -1335,7 +1348,7 @@ object Composer extends Controller {
       canvas.addTemplate(template, 0, 0)
 
       //  copyright notice
-      writeCopyright(canvas, writer, gameData)
+      writeCopyright(canvas, writer, gameData, page)
 
       // skills
       if (page.slot == "core")

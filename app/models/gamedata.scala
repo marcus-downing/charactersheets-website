@@ -58,6 +58,7 @@ object GameData {
     slot = (json \ "slot").asOpt[String].getOrElse(""),
     name = (json \ "name").asOpt[String].getOrElse(""),
     variant = (json \ "variant").asOpt[String],
+    a5 = (json \ "a5").asOpt[Boolean].getOrElse(false),
     position = (json \ "position").asOpt[Int]
   )
 
@@ -182,6 +183,7 @@ case class Page (
   slot: String = "",
   name: String = "",
   variant: Option[String] = None,
+  a5: Boolean,
   position: Option[Int] = None
 ) {
   def pagePosition = position.getOrElse(page)
